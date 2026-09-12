@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Noitrez AI Lead Automation Demo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">NOITREZ / LEAD OPERATIONS</div>
+        <h1>Every inquiry, ready for action.</h1>
+        <p>Turn website inquiries into prioritized follow-up, a clear next step, and a customer-ready response.</p>
+      </div>
+      <div class="live-indicator"><span></span> Automation active</div>
+    </header>
+
+    <section class="metrics" aria-label="Lead overview">
+      <div class="metric"><span>Total leads</span><strong id="total-leads">0</strong><small>Stored locally</small></div>
+      <div class="metric metric-accent"><span>High priority</span><strong id="high-leads">0</strong><small>Needs fast follow-up</small></div>
+      <div class="metric"><span>New to contact</span><strong id="new-leads">0</strong><small>Ready for action</small></div>
+      <div class="metric"><span>Workflow complete</span><strong id="sent-leads">0%</strong><small>Captured and analyzed</small></div>
+    </section>
+
+    <section class="workflow" aria-label="Automation workflow">
+      <div class="workflow-step active"><b>01</b><span>Capture</span></div>
+      <div class="workflow-line"></div>
+      <div class="workflow-step active"><b>02</b><span>Prioritize</span></div>
+      <div class="workflow-line"></div>
+      <div class="workflow-step active"><b>03</b><span>Notify</span></div>
+      <div class="workflow-line"></div>
+      <div class="workflow-step"><b>04</b><span>Convert</span></div>
+    </section>
+
+    <section class="card">
+      <div class="section-heading form-heading">
+        <div><div class="section-kicker">LIVE DEMO</div><h2>Analyze a New Inquiry</h2><p class="muted">See how the workflow handles a real customer message.</p></div>
+        <div class="scenario-group"><span class="muted">Try a scenario</span><button class="scenario" data-scenario="emergency" type="button">AC emergency</button><button class="scenario" data-scenario="installation" type="button">Installation</button><button class="scenario" data-scenario="maintenance" type="button">Maintenance</button></div>
+      </div>
+      <form id="lead-form">
+        <div class="grid">
+          <label>Name<input name="name" required placeholder="Sarah Johnson"></label>
+          <label>Email<input name="email" type="email" required placeholder="sarah@example.com"></label>
+          <label>Phone<input name="phone" placeholder="703-555-0123"></label>
+          <label>Service
+            <select name="service">
+              <option>AC repair</option>
+              <option>Heating repair</option>
+              <option>HVAC maintenance</option>
+              <option>New HVAC installation</option>
+              <option>Indoor air quality</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </div>
+        <label>Customer message
+          <textarea name="message" required placeholder="My AC stopped working today and the house is getting very hot."></textarea>
+        </label>
+        <button type="submit" class="primary-action">Analyze inquiry</button>
+      </form>
+      <div id="status"></div>
+    </section>
+
+    <section id="result" class="card hidden">
+      <div class="section-kicker">ANALYSIS COMPLETE</div><h2>Recommended next action</h2>
+      <div class="result-grid">
+        <div><span>Priority</span><strong id="temperature"></strong></div>
+        <div><span>Urgency</span><strong id="urgency"></strong></div>
+        <div><span>Service type</span><strong id="service-type"></strong></div>
+      </div>
+      <h3>Business summary</h3>
+      <p id="summary"></p>
+      <h3>Why this classification?</h3>
+      <p id="reason"></p>
+      <h3>Customer reply</h3>
+      <div class="reply" id="customer-reply"></div>
+      <p class="notification-state" id="email-status"></p>
+    </section>
+
+    <section class="card">
+      <div class="section-heading">
+        <div>
+          <h2>Lead Pipeline</h2>
+          <p class="muted">Move each inquiry from first contact to outcome.</p>
+        </div>
+        <button class="secondary" id="refresh">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Lead</th><th>Service</th><th>Priority</th><th>Summary</th><th>Status</th><th></th></tr></thead>
+          <tbody id="leads"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+<script>
+const form = document.getElementById("lead-form");
+const statusBox = document.getElementById("status");
+const result = document.getElementById("result");
+const scenarios = {
+  emergency: {name: "Sarah Johnson", email: "sarah@example.com", phone: "703-555-0123", service: "AC repair", message: "My AC stopped working today and the house is getting very hot. Can someone help as soon as possible?"},
+  installation: {name: "Marcus Lee", email: "marcus@example.com", phone: "571-555-0188", service: "New HVAC installation", message: "We are replacing our old system this fall and would like an estimate for a new, efficient HVAC system."},
+  maintenance: {name: "Priya Shah", email: "priya@example.com", phone: "703-555-0164", service: "HVAC maintenance", message: "I would like to schedule seasonal maintenance before the weather changes. What does your service include?"}
+};
+
+function formatPriority(value) {
+  const text = String(value || "").trim();
+  const lookup = {
+    Hot: "High",
+    Warm: "Medium",
+    Cold: "Low"
+  };
+  return lookup[text] || text;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  statusBox.textContent = "Analyzing lead...";
+  result.classList.add("hidden");
+
+  const data = Object.fromEntries(new FormData(form).entries());
+
+  try {
+    const response = await fetch("/api/leads", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
+    const body = await response.json();
+
+    if (!response.ok) throw new Error(body.error || "Request failed");
+
+    document.getElementById("temperature").textContent = formatPriority(body.analysis.temperature);
+    document.getElementById("urgency").textContent = body.analysis.urgency;
+    document.getElementById("service-type").textContent = body.analysis.service_type;
+    document.getElementById("summary").textContent = body.analysis.summary;
+    document.getElementById("reason").textContent = body.analysis.reason;
+    document.getElementById("customer-reply").textContent = body.analysis.customer_reply;
+    setNotificationState(body.email_sent, body.email_status);
+
+    result.classList.remove("hidden");
+    statusBox.textContent = `Lead #${body.lead_id} processed successfully.`;
+    form.reset();
+    loadLeads();
+  } catch (error) {
+    statusBox.textContent = "Error: " + error.message;
+  }
+});
+
+async function loadLeads() {
+  const response = await fetch("/api/leads");
+  const leads = await response.json();
+  const tbody = document.getElementById("leads");
+  tbody.innerHTML = "";
+  updateMetrics(leads);
+
+  for (const lead of leads) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><strong>${escapeHtml(lead.name)}</strong><small>${escapeHtml(lead.email)}</small></td>
+      <td>${escapeHtml(lead.service)}</td>
+      <td><span class="badge">${escapeHtml(formatPriority(lead.temperature))}</span></td>
+      <td>${escapeHtml(lead.summary)}</td>
+      <td><select class="status-select" data-lead-id="${lead.id}">${statusOptions(lead.status)}</select></td>
+      <td><button class="danger delete-lead" data-lead-id="${lead.id}" type="button" aria-label="Delete ${escapeHtml(lead.name)}">Delete</button></td>`;
+    tbody.appendChild(row);
+  }
+}
+
+function statusOptions(current) {
+  return ["New", "Contacted", "Scheduled", "Won", "Lost"]
+    .map(status => `<option ${status === (current || "New") ? "selected" : ""}>${status}</option>`).join("");
+}
+
+function updateMetrics(leads) {
+  const total = leads.length;
+  const high = leads.filter(lead => lead.temperature === "Hot").length;
+  const fresh = leads.filter(lead => !lead.status || lead.status === "New").length;
+  const sent = total;
+  document.getElementById("total-leads").textContent = total;
+  document.getElementById("high-leads").textContent = high;
+  document.getElementById("new-leads").textContent = fresh;
+  document.getElementById("sent-leads").textContent = total ? `${Math.round((sent / total) * 100)}%` : "0%";
+}
+
+function setNotificationState(sent, message) {
+  const notification = document.getElementById("email-status");
+  notification.className = `notification-state ${sent ? "success" : "warning"}`;
+  notification.textContent = `${sent ? "Notification sent" : "Notification status"}: ${message}`;
+}
+
+document.getElementById("leads").addEventListener("click", async (event) => {
+  const button = event.target.closest(".delete-lead");
+  if (!button) return;
+
+  const leadId = button.dataset.leadId;
+  button.disabled = true;
+  try {
+    const response = await fetch(`/api/leads/${leadId}`, {method: "DELETE"});
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || "Delete failed");
+    await loadLeads();
+  } catch (error) {
+    button.disabled = false;
+    statusBox.textContent = "Error: " + error.message;
+  }
+});
+
+document.getElementById("leads").addEventListener("change", async (event) => {
+  if (!event.target.classList.contains("status-select")) return;
+  const select = event.target;
+  const response = await fetch(`/api/leads/${select.dataset.leadId}`, {
+    method: "PATCH",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({status: select.value})
+  });
+  if (!response.ok) {
+    statusBox.textContent = "Error: Could not update lead status.";
+    return;
+  }
+  loadLeads();
+});
+
+document.querySelectorAll(".scenario").forEach(button => {
+  button.addEventListener("click", () => {
+    const scenario = scenarios[button.dataset.scenario];
+    Object.entries(scenario).forEach(([key, value]) => {
+      const field = form.elements[key];
+      if (field) field.value = value;
+    });
+    statusBox.textContent = "Scenario loaded. Submit it to run the automation.";
+  });
+});
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+document.getElementById("refresh").addEventListener("click", loadLeads);
+loadLeads();
+</script>
+</body>
+</html>
