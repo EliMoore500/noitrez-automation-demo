@@ -49,6 +49,9 @@ def init_db():
     conn.close()
 
 
+init_db()
+
+
 def analyze_lead(name, email, phone, service, message):
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key or api_key.startswith("PASTE_"):
