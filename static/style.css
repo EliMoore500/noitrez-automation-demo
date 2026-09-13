@@ -27,6 +27,16 @@ p { color: #b7c5c2; line-height: 1.6; }
 .workflow-step.active span { color: var(--text); }
 .workflow-step.active b { color: var(--accent); }
 .workflow-line { height: 1px; flex: 1; background: var(--line); }
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0 0 22px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--line); }
+.comparison-column { padding: 22px 24px; background: var(--surface); }
+.comparison-column.after { background: #11231d; }
+.comparison-column h2 { margin: 0 0 14px; font-size: 20px; }
+.comparison-column ol { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; counter-reset: comparison-step; }
+.comparison-column li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.comparison-column li::before { counter-increment: comparison-step; content: counter(comparison-step, decimal-leading-zero); color: #5f7072; font-size: 10px; font-weight: 700; }
+.comparison-column.after li { color: var(--text); }
+.comparison-column.after li::before { color: var(--accent); }
+.comparison-column.after li:not(:last-child)::after { content: ""; }
 .card {
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   border: 1px solid var(--line);
@@ -114,6 +124,7 @@ th { color: #8e98a5; font-size: 12px; text-transform: uppercase; }
   .live-indicator { padding: 0; margin-top: 20px; }
   .metrics { grid-template-columns: 1fr 1fr; }
   .grid, .result-grid { grid-template-columns: 1fr; }
+  .comparison { grid-template-columns: 1fr; gap: 1px; }
   .activity-timeline { grid-template-columns: 1fr; gap: 16px; }
   .activity-step { display: grid; grid-template-columns: 29px 1fr; column-gap: 12px; padding: 0; }
   .activity-step:not(:last-child)::after { top: 29px; left: 14px; right: auto; width: 1px; height: calc(100% + 16px); }
