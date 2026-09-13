@@ -15,6 +15,14 @@ app = Flask(__name__)
 DB_PATH = os.path.join("data", "leads.db")
 
 
+@app.errorhandler(500)
+def handle_server_error(error):
+    if request.path.startswith("/api/"):
+        app.logger.exception("Unhandled API error", exc_info=error)
+        return jsonify({"error": "The server could not complete this request."}), 500
+    return error
+
+
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
