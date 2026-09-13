@@ -257,6 +257,11 @@ def index():
     return render_template("index.html")
 
 
+@app.get("/healthz")
+def healthz():
+    return jsonify({"status": "ok"})
+
+
 @app.post("/api/leads")
 def create_lead():
     data = request.get_json(silent=True) or {}
