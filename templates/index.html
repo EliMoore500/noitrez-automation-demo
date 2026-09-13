@@ -116,6 +116,18 @@ function formatPriority(value) {
   return lookup[text] || text;
 }
 
+async function readJsonResponse(response) {
+  const text = await response.text();
+  let body;
+  try {
+    body = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(`Server returned ${response.status} ${response.statusText} instead of JSON.`);
+  }
+  if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
+  return body;
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   statusBox.textContent = "Analyzing lead...";
@@ -129,9 +141,7 @@ form.addEventListener("submit", async (event) => {
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(data)
     });
-    const body = await response.json();
-
-    if (!response.ok) throw new Error(body.error || "Request failed");
+    const body = await readJsonResponse(response);
 
     document.getElementById("temperature").textContent = formatPriority(body.analysis.temperature);
     document.getElementById("urgency").textContent = body.analysis.urgency;
@@ -152,7 +162,7 @@ form.addEventListener("submit", async (event) => {
 
 async function loadLeads() {
   const response = await fetch("/api/leads");
-  const leads = await response.json();
+  const leads = await readJsonResponse(response);
   const tbody = document.getElementById("leads");
   tbody.innerHTML = "";
   updateMetrics(leads);
@@ -200,8 +210,7 @@ document.getElementById("leads").addEventListener("click", async (event) => {
   button.disabled = true;
   try {
     const response = await fetch(`/api/leads/${leadId}`, {method: "DELETE"});
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error || "Delete failed");
+    await readJsonResponse(response);
     await loadLeads();
   } catch (error) {
     button.disabled = false;
@@ -212,16 +221,17 @@ document.getElementById("leads").addEventListener("click", async (event) => {
 document.getElementById("leads").addEventListener("change", async (event) => {
   if (!event.target.classList.contains("status-select")) return;
   const select = event.target;
-  const response = await fetch(`/api/leads/${select.dataset.leadId}`, {
-    method: "PATCH",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({status: select.value})
-  });
-  if (!response.ok) {
-    statusBox.textContent = "Error: Could not update lead status.";
-    return;
+  try {
+    const response = await fetch(`/api/leads/${select.dataset.leadId}`, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({status: select.value})
+    });
+    await readJsonResponse(response);
+    await loadLeads();
+  } catch (error) {
+    statusBox.textContent = "Error: " + error.message;
   }
-  loadLeads();
 });
 
 document.querySelectorAll(".scenario").forEach(button => {
@@ -245,7 +255,9 @@ function escapeHtml(value) {
 }
 
 document.getElementById("refresh").addEventListener("click", loadLeads);
-loadLeads();
+loadLeads().catch(error => {
+  statusBox.textContent = "Error loading leads: " + error.message;
+});
 </script>
 </body>
 </html>
