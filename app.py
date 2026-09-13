@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 from openai import OpenAI
 
-load_dotenv()
+load_dotenv(dotenv_path=".env")
 
 app = Flask(__name__)
 DB_PATH = os.path.join("data", "leads.db")
@@ -153,6 +153,7 @@ def smtp_settings():
     password = "".join(os.getenv("SMTP_PASSWORD", "").split())
     recipient = os.getenv("BUSINESS_NOTIFICATION_EMAIL", "").strip()
     use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+    use_ssl = os.getenv("SMTP_USE_SSL", "false").lower() == "true"
 
     if not all([host, username, sender, password, recipient]):
         return None, "SMTP is enabled but one or more SMTP settings are missing in .env"
@@ -165,13 +166,15 @@ def smtp_settings():
         "password": password,
         "recipient": recipient,
         "use_tls": use_tls,
+        "use_ssl": use_ssl,
     }, ""
 
 
 def send_email(message, settings):
     try:
-        with smtplib.SMTP(settings["host"], settings["port"], timeout=20) as server:
-            if settings["use_tls"]:
+        smtp_client = smtplib.SMTP_SSL if settings["use_ssl"] else smtplib.SMTP
+        with smtp_client(settings["host"], settings["port"], timeout=20) as server:
+            if settings["use_tls"] and not settings["use_ssl"]:
                 server.starttls()
             server.login(settings["username"], settings["password"])
             server.send_message(message)
