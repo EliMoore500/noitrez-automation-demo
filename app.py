@@ -55,10 +55,13 @@ init_db()
 def analyze_lead(name, email, phone, service, message):
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key or api_key.startswith("PASTE_"):
-        raise RuntimeError("OPENAI_API_KEY is not configured in .env")
+        raise RuntimeError(
+            "OPENAI_API_KEY is not configured. Add it to the local .env file "
+            "or to the deployment service's environment variables."
+        )
 
     client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     prompt = f"""
 You are an AI lead-intake assistant for a fictional Northern Virginia HVAC company.
