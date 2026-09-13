@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 from openai import OpenAI
 
-load_dotenv(dotenv_path=".env")
+load_dotenv()
 
 app = Flask(__name__)
 DB_PATH = os.path.join("data", "leads.db")

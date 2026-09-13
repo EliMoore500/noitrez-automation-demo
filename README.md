@@ -22,19 +22,11 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 python -m pip install -r requirements.txt
 ```
 
-`.env.example` is reference-only and is not loaded by the application. Create the actual runtime file first:
-
-```powershell
-Copy-Item .env.example .env
-```
-
 Then edit `.env` and replace:
 
 `PASTE_YOUR_OPENAI_API_KEY_HERE`
 
 with your OpenAI API key.
-
-The local app loads settings from `.env`. Keep `.env` private and never commit it; deployment platforms such as Render should receive these same values through their environment-variable settings.
 
 Start the app:
 
