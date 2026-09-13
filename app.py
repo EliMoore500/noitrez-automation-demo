@@ -1,5 +1,7 @@
 import json
+import hashlib
 import os
+import re
 import smtplib
 import sqlite3
 from datetime import datetime, timezone
@@ -45,7 +47,8 @@ def init_db():
             urgency TEXT,
             summary TEXT,
             customer_reply TEXT,
-            ai_raw TEXT
+            ai_raw TEXT,
+            fingerprint TEXT
         )
     """)
     columns = {
@@ -53,6 +56,8 @@ def init_db():
     }
     if "status" not in columns:
         conn.execute("ALTER TABLE leads ADD COLUMN status TEXT NOT NULL DEFAULT 'New'")
+    if "fingerprint" not in columns:
+        conn.execute("ALTER TABLE leads ADD COLUMN fingerprint TEXT")
     conn.commit()
     conn.close()
 
@@ -71,36 +76,52 @@ def analyze_lead(name, email, phone, service, message):
     client = OpenAI(api_key=api_key)
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-    prompt = f"""
-You are an AI lead-intake assistant for a fictional Northern Virginia HVAC company.
-
-Analyze this incoming customer lead.
-
-Customer name: {name}
+    prompt = f"""Analyze this HVAC lead and return the requested fields.
+Name: {name}
 Email: {email}
 Phone: {phone}
-Requested service: {service}
-Customer message: {message}
+Service: {service}
+Message: {message}
 
-Return ONLY valid JSON with exactly these keys:
-temperature: one of "Hot", "Warm", "Cold"
-urgency: one of "Emergency", "Urgent", "Normal", "Low"
-service_type: short description
-summary: one concise sentence for the business
-customer_reply: a professional, friendly reply to the customer. Do not promise a specific appointment time or price.
-reason: one short sentence explaining the temperature classification.
-
-Rules:
-- Hot means the business should contact the customer very soon because the lead is highly likely to need service now.
-- Warm means a legitimate lead that should be followed up.
-- Cold means low urgency, weak intent, or mostly informational.
-- Treat safety-related HVAC problems as urgent, but do not provide dangerous repair instructions.
-"""
+Classify Hot for an active, highly likely immediate need; Warm for a legitimate follow-up; Cold for low urgency or informational intent. Safety issues are urgent. Do not give dangerous repair instructions or promise a specific time or price."""
 
     response = client.responses.create(
         model=model,
         input=prompt,
+        max_output_tokens=350,
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "lead_analysis",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "temperature": {"type": "string", "enum": ["Hot", "Warm", "Cold"]},
+                        "urgency": {"type": "string", "enum": ["Emergency", "Urgent", "Normal", "Low"]},
+                        "service_type": {"type": "string"},
+                        "summary": {"type": "string"},
+                        "customer_reply": {"type": "string"},
+                        "reason": {"type": "string"},
+                    },
+                    "required": [
+                        "temperature", "urgency", "service_type",
+                        "summary", "customer_reply", "reason",
+                    ],
+                    "additionalProperties": False,
+                },
+            }
+        },
     )
+
+    usage = getattr(response, "usage", None)
+    if usage:
+        app.logger.info(
+            "OpenAI lead analysis usage: input_tokens=%s output_tokens=%s total_tokens=%s",
+            getattr(usage, "input_tokens", "unknown"),
+            getattr(usage, "output_tokens", "unknown"),
+            getattr(usage, "total_tokens", "unknown"),
+        )
 
     text = response.output_text.strip()
 
@@ -127,19 +148,39 @@ def save_lead(lead, ai):
     cur = conn.execute("""
         INSERT INTO leads (
             created_at, name, email, phone, service, message,
-            temperature, urgency, summary, customer_reply, ai_raw
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            temperature, urgency, summary, customer_reply, ai_raw, fingerprint
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         datetime.now(timezone.utc).isoformat(),
         lead["name"], lead["email"], lead["phone"],
         lead["service"], lead["message"],
         ai["temperature"], ai["urgency"], ai["summary"],
-        ai["customer_reply"], json.dumps(ai)
+        ai["customer_reply"], json.dumps(ai), lead_fingerprint(lead)
     ))
     conn.commit()
     lead_id = cur.lastrowid
     conn.close()
     return lead_id
+
+
+def lead_fingerprint(lead):
+    normalized = "|".join(
+        lead[field].strip().lower()
+        for field in ("name", "email", "phone", "service", "message")
+    )
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def get_cached_lead(lead):
+    conn = get_db()
+    row = conn.execute(
+        "SELECT id, ai_raw FROM leads WHERE fingerprint = ? ORDER BY id DESC LIMIT 1",
+        (lead_fingerprint(lead),),
+    ).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return row["id"], json.loads(row["ai_raw"])
 
 
 def format_priority(value):
@@ -287,7 +328,39 @@ def create_lead():
         "message": str(data["message"]).strip(),
     }
 
+    limits = {
+        "name": 200,
+        "email": 254,
+        "phone": 50,
+        "service": 100,
+        "message": 2000,
+    }
+    oversized = [
+        field for field, limit in limits.items()
+        if len(lead[field]) > limit
+    ]
+    if oversized:
+        return jsonify({"error": f"Fields are too long: {', '.join(oversized)}"}), 400
+    if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", lead["email"]):
+        return jsonify({"error": "Please provide a valid email address."}), 400
+
     try:
+        cached = get_cached_lead(lead)
+        if cached and os.getenv("CACHE_DUPLICATE_LEADS", "true").lower() == "true":
+            cached_id, cached_ai = cached
+            cached_status = "Duplicate lead reused; no new AI or email charge incurred."
+            return jsonify({
+                "success": True,
+                "lead_id": cached_id,
+                "lead": lead,
+                "analysis": cached_ai,
+                "email_sent": False,
+                "email_status": cached_status,
+                "customer_email_sent": False,
+                "customer_email_status": cached_status,
+                "cached": True,
+            })
+
         ai = analyze_lead(**lead)
         lead_id = save_lead(lead, ai)
         settings, settings_status = smtp_settings()

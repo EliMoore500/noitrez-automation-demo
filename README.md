@@ -46,6 +46,8 @@ To turn on automatic business notification emails, set `SMTP_ENABLED=true` and f
 
 For a Gmail alias, set `SMTP_USERNAME` to the owning Google account, such as `elijah@noitrez.com`, and use an App Password generated for that account. Set `SMTP_FROM` to the alias, such as `hello@noitrez.com`, after adding and verifying it as a Send mail as address in Gmail. Set `CUSTOMER_REPLY_ENABLED=true` to email the AI-generated reply to the customer after the staff notification succeeds.
 
+The app limits AI output to 350 tokens, uses structured JSON output, rejects oversized submissions before calling OpenAI, and reuses an identical lead when `CACHE_DUPLICATE_LEADS=true` (the default). Set `CACHE_DUPLICATE_LEADS=false` if repeated submissions should be analyzed again.
+
 If the hosting service reports `Network is unreachable` while connecting to Gmail on port 587, use Gmail SSL instead: set `SMTP_PORT=465`, `SMTP_USE_TLS=false`, and `SMTP_USE_SSL=true` in the deployment environment.
 
 Do not put `.env` in GitHub. It is already listed in `.gitignore`.
