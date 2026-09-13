@@ -139,9 +139,9 @@ def format_priority(value):
     }.get(value, value)
 
 
-def send_business_email(lead, ai):
+def smtp_settings():
     if os.getenv("SMTP_ENABLED", "false").lower() != "true":
-        return False, "SMTP email is disabled. Lead was saved successfully."
+        return None, "SMTP email is disabled. Lead was saved successfully."
 
     host = os.getenv("SMTP_HOST", "").strip()
     port = int(os.getenv("SMTP_PORT", "587"))
@@ -152,24 +152,68 @@ def send_business_email(lead, ai):
     use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 
     if not all([host, username, sender, password, recipient]):
-        return False, "SMTP is enabled but one or more SMTP settings are missing in .env"
+        return None, "SMTP is enabled but one or more SMTP settings are missing in .env"
+
+    return {
+        "host": host,
+        "port": port,
+        "username": username,
+        "sender": sender,
+        "password": password,
+        "recipient": recipient,
+        "use_tls": use_tls,
+    }, ""
+
+
+def send_email(message, settings):
+    try:
+        with smtplib.SMTP(settings["host"], settings["port"], timeout=20) as server:
+            if settings["use_tls"]:
+                server.starttls()
+            server.login(settings["username"], settings["password"])
+            server.send_message(message)
+    except smtplib.SMTPAuthenticationError:
+        app.logger.exception("SMTP authentication failed")
+        return False, (
+            "SMTP authentication failed. The Gmail App Password must belong to "
+            f"{settings['username']}. Generate a new App Password while signed "
+            "into that exact Google account, then restart the Flask app."
+        )
+    except (OSError, smtplib.SMTPException) as exc:
+        app.logger.exception("SMTP send failed")
+        return False, f"SMTP send failed: {exc}"
+
+    return True, "Email sent successfully."
+
+
+def send_business_email(lead, ai, settings):
+    priority = format_priority(ai["temperature"])
+    recommended_action = {
+        "Hot": "Contact within 15 minutes.",
+        "Warm": "Follow up today.",
+        "Cold": "Add to a future follow-up list.",
+    }.get(ai["temperature"], "Review and follow up.")
 
     msg = EmailMessage()
-    priority = format_priority(ai["temperature"])
-    msg["Subject"] = f"[Noitrez] {priority}: {lead['name']} - {lead['service']}"
-    msg["From"] = sender
-    msg["To"] = recipient
+    msg["Subject"] = f"[Noitrez] New {priority} Lead - {lead['name']}"
+    msg["From"] = settings["sender"]
+    msg["To"] = settings["recipient"]
     msg.set_content(f"""New lead received.
 
-Priority: {priority}
-Urgency: {ai['urgency']}
-Service: {lead['service']}
-Service type: {ai.get('service_type', lead.get('service', ''))}
+New {priority} Lead
 
-Customer:
-Name: {lead['name']}
-Email: {lead['email']}
-Phone: {lead['phone']}
+{lead['name']}
+{lead['service']}
+{lead['phone'] or 'Phone not provided'}
+
+AI Summary: {ai['summary']}
+
+Recommended action: {recommended_action}
+
+Details:
+Urgency: {ai['urgency']}
+Service type: {ai.get('service_type', lead.get('service', ''))}
+Customer email: {lead['email']}
 
 Message:
 {lead['message']}
@@ -183,25 +227,23 @@ Why:
 Suggested customer reply:
 {ai['customer_reply']}
 """)
+    return send_email(msg, settings)
 
-    try:
-        with smtplib.SMTP(host, port, timeout=20) as server:
-            if use_tls:
-                server.starttls()
-            server.login(username, password)
-            server.send_message(msg)
-    except smtplib.SMTPAuthenticationError as exc:
-        app.logger.exception("SMTP authentication failed")
-        return False, (
-            "SMTP authentication failed. The Gmail App Password must belong to "
-            f"{username}. Generate a new App Password while signed into that exact "
-            "Google account, then restart the Flask app."
-        )
-    except smtplib.SMTPException as exc:
-        app.logger.exception("SMTP send failed")
-        return False, f"SMTP send failed: {exc}"
 
-    return True, "Business notification email sent."
+def send_customer_reply_email(lead, ai, settings):
+    msg = EmailMessage()
+    msg["Subject"] = "Thanks for contacting Noitrez"
+    msg["From"] = settings["sender"]
+    msg["To"] = lead["email"]
+    msg.set_content(f"""Hi {lead['name']},
+
+{ai['customer_reply']}
+
+Your request: {lead['service']}
+
+Noitrez
+""")
+    return send_email(msg, settings)
 
 
 @app.route("/")
@@ -229,7 +271,24 @@ def create_lead():
     try:
         ai = analyze_lead(**lead)
         lead_id = save_lead(lead, ai)
-        email_sent, email_status = send_business_email(lead, ai)
+        settings, settings_status = smtp_settings()
+        if settings is None:
+            email_sent = False
+            email_status = settings_status
+            customer_email_sent = False
+            customer_email_status = settings_status
+        else:
+            email_sent, email_status = send_business_email(lead, ai, settings)
+            if email_sent and os.getenv("CUSTOMER_REPLY_ENABLED", "true").lower() == "true":
+                customer_email_sent, customer_email_status = send_customer_reply_email(
+                    lead, ai, settings
+                )
+            elif not email_sent:
+                customer_email_sent = False
+                customer_email_status = "Customer reply was not sent because staff notification failed."
+            else:
+                customer_email_sent = False
+                customer_email_status = "Customer reply email is disabled."
 
         return jsonify({
             "success": True,
@@ -237,7 +296,9 @@ def create_lead():
             "lead": lead,
             "analysis": ai,
             "email_sent": email_sent,
-            "email_status": email_status
+            "email_status": email_status,
+            "customer_email_sent": customer_email_sent,
+            "customer_email_status": customer_email_status,
         })
     except Exception as exc:
         app.logger.exception("Lead processing failed")

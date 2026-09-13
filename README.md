@@ -44,7 +44,7 @@ The demo works without SMTP. It stores the lead and displays the generated respo
 
 To turn on automatic business notification emails, set `SMTP_ENABLED=true` and fill in the SMTP settings in `.env`.
 
-For a Gmail alias, set `SMTP_USERNAME` to the owning Google account, such as `elijah@noitrez.com`, and use an App Password generated for that account. Set `SMTP_FROM` to the alias, such as `hello@noitrez.com`, after adding and verifying it as a Send mail as address in Gmail.
+For a Gmail alias, set `SMTP_USERNAME` to the owning Google account, such as `elijah@noitrez.com`, and use an App Password generated for that account. Set `SMTP_FROM` to the alias, such as `hello@noitrez.com`, after adding and verifying it as a Send mail as address in Gmail. Set `CUSTOMER_REPLY_ENABLED=true` to email the AI-generated reply to the customer after the staff notification succeeds.
 
 Do not put `.env` in GitHub. It is already listed in `.gitignore`.
 

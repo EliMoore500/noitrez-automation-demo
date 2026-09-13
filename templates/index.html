@@ -64,7 +64,31 @@
     </section>
 
     <section id="result" class="card hidden">
-      <div class="section-kicker">ANALYSIS COMPLETE</div><h2>Recommended next action</h2>
+      <div class="section-kicker">AUTOMATION COMPLETE</div><h2>What just happened</h2>
+      <div class="activity-timeline" aria-label="Lead automation activity">
+        <div class="activity-step">
+          <div class="activity-marker">✓</div>
+          <div><strong>Lead captured</strong><p id="activity-captured">Inquiry received</p></div>
+        </div>
+        <div class="activity-step">
+          <div class="activity-marker">✓</div>
+          <div><strong>AI analyzed lead</strong><p id="activity-analyzed">Priority and urgency identified</p></div>
+        </div>
+        <div class="activity-step">
+          <div class="activity-marker">✓</div>
+          <div><strong>Lead stored</strong><p>Added to lead pipeline</p></div>
+        </div>
+        <div class="activity-step" id="activity-notification-step">
+          <div class="activity-marker">✓</div>
+          <div><strong>Business notified</strong><p id="activity-notified">Email sent to staff</p></div>
+        </div>
+        <div class="activity-step">
+          <div class="activity-marker">✓</div>
+          <div><strong>Customer response generated</strong><p id="activity-response">Personalized reply ready</p></div>
+        </div>
+      </div>
+      <div class="result-divider"></div>
+      <h2>Recommended next action</h2>
       <div class="result-grid">
         <div><span>Priority</span><strong id="temperature"></strong></div>
         <div><span>Urgency</span><strong id="urgency"></strong></div>
@@ -150,6 +174,7 @@ form.addEventListener("submit", async (event) => {
     document.getElementById("reason").textContent = body.analysis.reason;
     document.getElementById("customer-reply").textContent = body.analysis.customer_reply;
     setNotificationState(body.email_sent, body.email_status);
+    showAutomationActivity(body);
 
     result.classList.remove("hidden");
     statusBox.textContent = `Lead #${body.lead_id} processed successfully.`;
@@ -159,6 +184,20 @@ form.addEventListener("submit", async (event) => {
     statusBox.textContent = "Error: " + error.message;
   }
 });
+
+function showAutomationActivity(body) {
+  const lead = body.lead;
+  const analysis = body.analysis;
+  document.getElementById("activity-captured").textContent = `${lead.name} - ${lead.service}`;
+  document.getElementById("activity-analyzed").textContent = `${formatPriority(analysis.temperature)} priority · ${analysis.urgency} · ${analysis.temperature} lead`;
+  document.getElementById("activity-notified").textContent = body.email_sent
+    ? "Email sent to staff"
+    : "Email not sent - review notification settings";
+  document.getElementById("activity-notification-step").classList.toggle("failed", !body.email_sent);
+  document.getElementById("activity-response").textContent = body.customer_email_sent
+    ? "Personalized reply emailed to customer"
+    : "Personalized reply ready to review";
+}
 
 async function loadLeads() {
   const response = await fetch("/api/leads");

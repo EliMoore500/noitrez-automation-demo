@@ -71,6 +71,15 @@ button:disabled { cursor: wait; opacity: .6; }
 .scenario-group > span { margin-right: 4px; }
 button.scenario { padding: 8px 10px; font-size: 11px; }
 .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.activity-timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin: 22px 0 26px; }
+.activity-step { position: relative; min-width: 0; padding-right: 16px; }
+.activity-step:not(:last-child)::after { content: ""; position: absolute; top: 14px; left: 29px; right: 0; height: 1px; background: #416154; }
+.activity-marker { position: relative; z-index: 1; display: grid; place-items: center; width: 29px; height: 29px; margin-bottom: 12px; border: 1px solid var(--accent); border-radius: 50%; background: #163428; color: var(--accent); font-size: 15px; font-weight: 700; }
+.activity-step strong { display: block; position: relative; z-index: 1; font-size: 13px; line-height: 1.3; }
+.activity-step p { position: relative; z-index: 1; margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.activity-step.failed .activity-marker { border-color: #e7b86c; background: #3d2f18; color: #e7b86c; }
+.activity-step.failed p { color: #e7b86c; }
+.result-divider { height: 1px; margin: 0 0 24px; background: var(--line); }
 .result-grid > div {
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -105,6 +114,10 @@ th { color: #8e98a5; font-size: 12px; text-transform: uppercase; }
   .live-indicator { padding: 0; margin-top: 20px; }
   .metrics { grid-template-columns: 1fr 1fr; }
   .grid, .result-grid { grid-template-columns: 1fr; }
+  .activity-timeline { grid-template-columns: 1fr; gap: 16px; }
+  .activity-step { display: grid; grid-template-columns: 29px 1fr; column-gap: 12px; padding: 0; }
+  .activity-step:not(:last-child)::after { top: 29px; left: 14px; right: auto; width: 1px; height: calc(100% + 16px); }
+  .activity-marker { grid-row: span 2; margin: 0; }
   .workflow { gap: 7px; }
   .workflow-line { min-width: 8px; }
   .workflow-step span { display: none; }
