@@ -1,71 +1,34 @@
+<!-- Marketing site reference: https://noitrez.com -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Noitrez AI Lead Automation Demo</title>
+  <meta name="description" content="See how Noitrez helps small Northern Virginia service businesses prioritize new inquiries and prepare faster follow-up.">
+  <title>Noitrez | Northern Virginia Lead Follow-Up Demo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <main class="container">
     <header class="hero">
       <div>
-        <div class="eyebrow">NOITREZ / LEAD OPERATIONS</div>
-        <h1>Every inquiry, ready for action.</h1>
-        <p class="business-outcome">Respond faster. Miss fewer leads. Spend less time on administrative work.</p>
-        <p>Turn website inquiries into prioritized follow-up, a clear next step, and a customer-ready response.</p>
+        <div class="eyebrow">NOITREZ / NORTHERN VIRGINIA</div>
+        <h1>Every inquiry gets a next step.</h1>
+        <p class="business-outcome">Practical lead follow-up for small HVAC teams in Northern Virginia: spot urgent requests, prepare a thoughtful reply, and spend less time on repetitive admin.</p>
+        <div class="hero-actions">
+          <a class="hero-demo" href="#lead-demo">See a sample analysis <span aria-hidden="true">↓</span></a>
+          <a class="hero-audit" href="mailto:sales@noitrez.com?subject=Free%20Automation%20Audit">Get a free automation audit</a>
+        </div>
       </div>
       <div class="live-indicator"><span></span> Automation active</div>
     </header>
 
-    <section class="metrics" aria-label="Lead overview">
-      <div class="metric"><span>Total leads</span><strong id="total-leads">0</strong><small>Stored locally</small></div>
-      <div class="metric metric-accent"><span>High priority</span><strong id="high-leads">0</strong><small>Needs fast follow-up</small></div>
-      <div class="metric"><span>New to contact</span><strong id="new-leads">0</strong><small>Ready for action</small></div>
-      <div class="metric"><span>Workflow complete</span><strong id="sent-leads">0%</strong><small>Captured and analyzed</small></div>
-    </section>
-
-    <section class="workflow" aria-label="Automation workflow">
-      <div class="workflow-step active"><b>01</b><span>Capture</span></div>
-      <div class="workflow-line"></div>
-      <div class="workflow-step active"><b>02</b><span>Prioritize</span></div>
-      <div class="workflow-line"></div>
-      <div class="workflow-step active"><b>03</b><span>Notify</span></div>
-      <div class="workflow-line"></div>
-      <div class="workflow-step"><b>04</b><span>Convert</span></div>
-    </section>
-
-    <section class="comparison" aria-label="Before and after Noitrez">
-      <div class="comparison-column before">
-        <div class="section-kicker">WITHOUT NOITREZ</div>
-        <h2>Manual follow-up</h2>
-        <ol>
-          <li>Website inquiry</li>
-          <li>Employee checks email</li>
-          <li>Reads message</li>
-          <li>Determines urgency</li>
-          <li>Copies information</li>
-          <li>Contacts customer</li>
-        </ol>
-      </div>
-      <div class="comparison-column after">
-        <div class="section-kicker">WITH NOITREZ</div>
-        <h2>Immediate action</h2>
-        <ol>
-          <li>Website inquiry</li>
-          <li>AI analyzes automatically</li>
-          <li>Lead prioritized</li>
-          <li>Business notified</li>
-          <li>Customer response generated</li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="card">
+    <section class="card demo-card" id="lead-demo">
       <div class="section-heading form-heading">
-        <div><div class="section-kicker">LIVE DEMO</div><h2>Analyze a New Inquiry</h2><p class="muted">See how the workflow handles a real customer message.</p></div>
-        <div class="scenario-group"><span class="muted">Try a scenario</span><button class="scenario" data-scenario="emergency" type="button">AC emergency</button><button class="scenario" data-scenario="installation" type="button">Installation</button><button class="scenario" data-scenario="maintenance" type="button">Maintenance</button></div>
+        <div><div class="section-kicker">INTERACTIVE EXAMPLE</div><h2>See a lead handled</h2><p class="muted">Choose a local service scenario to preview the outcome instantly. No form or AI request needed.</p></div>
+        <div class="scenario-group" aria-label="Sample lead scenarios"><span class="muted">Choose a sample</span><button class="scenario" data-scenario="emergency" type="button">Urgent AC repair</button><button class="scenario" data-scenario="installation" type="button">System estimate</button><button class="scenario" data-scenario="maintenance" type="button">Seasonal tune-up</button></div>
       </div>
+      <div class="live-form-intro"><h3>Or analyze your own inquiry</h3><p class="muted">Live submissions are sent to OpenAI for analysis, saved in this demo's lead pipeline, and may trigger configured email notifications. Use fictional details and avoid sensitive information.</p></div>
       <form id="lead-form">
         <div class="grid">
           <label>Name<input name="name" required placeholder="Sarah Johnson"></label>
@@ -85,14 +48,15 @@
         <label>Customer message
           <textarea name="message" required placeholder="My AC stopped working today and the house is getting very hot."></textarea>
         </label>
-        <button type="submit" class="primary-action">Analyze inquiry</button>
+        <button type="submit" class="primary-action">Run live analysis</button>
       </form>
       <div id="status"></div>
     </section>
 
     <section id="result" class="card hidden">
-      <div class="section-kicker">AUTOMATION COMPLETE</div><h2>What just happened</h2>
-      <div class="activity-timeline" aria-label="Lead automation activity">
+      <div class="section-kicker" id="result-kicker">AUTOMATION COMPLETE</div><h2 id="result-title">What just happened</h2>
+      <p class="preview-notice hidden" id="preview-notice">Illustrative sample only. Nothing was sent to AI, saved, or emailed.</p>
+      <div class="activity-timeline" id="activity-timeline" aria-label="Lead automation activity">
         <div class="activity-step">
           <div class="activity-marker">✓</div>
           <div><strong>Lead captured</strong><p id="activity-captured">Inquiry received</p></div>
@@ -115,7 +79,8 @@
         </div>
       </div>
       <div class="result-divider"></div>
-      <h2>Recommended next action</h2>
+      <h2>Suggested next action</h2>
+      <p class="next-action" id="next-action"></p>
       <div class="result-grid">
         <div><span>Priority</span><strong id="temperature"></strong></div>
         <div><span>Urgency</span><strong id="urgency"></strong></div>
@@ -130,32 +95,28 @@
       <p class="notification-state" id="email-status"></p>
     </section>
 
-    <section class="card">
-      <div class="section-heading">
-        <div>
-          <h2>Lead Pipeline</h2>
-          <p class="muted">Move each inquiry from first contact to outcome.</p>
+    <details class="pipeline">
+      <summary>Lead pipeline <span>Review, update, or remove saved inquiries</span></summary>
+      <section class="card">
+        <div class="section-heading">
+          <div>
+            <h2>Saved inquiries</h2>
+            <p class="muted">Move each lead from first contact to outcome.</p>
+          </div>
+          <button class="secondary" id="refresh" type="button">Refresh</button>
         </div>
-        <button class="secondary" id="refresh">Refresh</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Lead</th><th>Service</th><th>Priority</th><th>Summary</th><th>Status</th><th></th></tr></thead>
-          <tbody id="leads"></tbody>
-        </table>
-      </div>
-    </section>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Lead</th><th>Service</th><th>Priority</th><th>Summary</th><th>Status</th><th></th></tr></thead>
+            <tbody id="leads"></tbody>
+          </table>
+        </div>
+      </section>
+    </details>
 
-    <section class="audit-cta">
-      <div>
-        <div class="section-kicker">READY TO AUTOMATE?</div>
-        <h2>Want this workflow for your business?</h2>
-        <p>We'll identify one repetitive process you could automate.</p>
-      </div>
-      <div class="audit-action">
-        <a href="mailto:sales@noitrez.com?subject=Free%20Automation%20Audit">Get a Free Automation Audit <span>-></span></a>
-        <small>sales@noitrez.com</small>
-      </div>
+    <section class="closing-cta">
+      <div><div class="section-kicker">FOR YOUR BUSINESS</div><h2>Start with one repetitive task.</h2><p class="muted">Get a free automation audit for your Northern Virginia business.</p></div>
+      <a href="mailto:sales@noitrez.com?subject=Free%20Automation%20Audit">Talk through your workflow <span aria-hidden="true">→</span></a>
     </section>
   </main>
 
@@ -164,9 +125,33 @@ const form = document.getElementById("lead-form");
 const statusBox = document.getElementById("status");
 const result = document.getElementById("result");
 const scenarios = {
-  emergency: {name: "Sarah Johnson", email: "sarah@example.com", phone: "703-555-0123", service: "AC repair", message: "My AC stopped working today and the house is getting very hot. Can someone help as soon as possible?"},
-  installation: {name: "Marcus Lee", email: "marcus@example.com", phone: "571-555-0188", service: "New HVAC installation", message: "We are replacing our old system this fall and would like an estimate for a new, efficient HVAC system."},
-  maintenance: {name: "Priya Shah", email: "priya@example.com", phone: "703-555-0164", service: "HVAC maintenance", message: "I would like to schedule seasonal maintenance before the weather changes. What does your service include?"}
+  emergency: {
+    lead: {name: "Sample homeowner", service: "AC repair"},
+    analysis: {
+      temperature: "Hot", urgency: "Urgent", service_type: "AC repair",
+      summary: "Cooling stopped during warm weather; prompt follow-up is recommended.",
+      reason: "The customer reports a complete loss of cooling and asks for help soon.",
+      customer_reply: "Thanks for reaching out. We received your AC repair request and will review the next available options with you."
+    }
+  },
+  installation: {
+    lead: {name: "Sample homeowner", service: "New HVAC installation"},
+    analysis: {
+      temperature: "Warm", urgency: "Normal", service_type: "Installation estimate",
+      summary: "The customer is planning a system replacement and wants an efficient installation estimate.",
+      reason: "This is a clear buying interest with a future timeframe, rather than an immediate outage.",
+      customer_reply: "Thanks for considering us for your system replacement. We can learn more about your home and discuss options for an estimate."
+    }
+  },
+  maintenance: {
+    lead: {name: "Sample homeowner", service: "HVAC maintenance"},
+    analysis: {
+      temperature: "Warm", urgency: "Normal", service_type: "Seasonal maintenance",
+      summary: "The customer wants to schedule routine maintenance before the season changes.",
+      reason: "The request is specific and actionable, with no urgent equipment failure reported.",
+      customer_reply: "Thanks for getting in touch. We can help you plan seasonal maintenance and explain what the visit includes."
+    }
+  }
 };
 
 function formatPriority(value) {
@@ -206,16 +191,7 @@ form.addEventListener("submit", async (event) => {
     });
     const body = await readJsonResponse(response);
 
-    document.getElementById("temperature").textContent = formatPriority(body.analysis.temperature);
-    document.getElementById("urgency").textContent = body.analysis.urgency;
-    document.getElementById("service-type").textContent = body.analysis.service_type;
-    document.getElementById("summary").textContent = body.analysis.summary;
-    document.getElementById("reason").textContent = body.analysis.reason;
-    document.getElementById("customer-reply").textContent = body.analysis.customer_reply;
-    setNotificationState(body.email_sent, body.email_status);
-    showAutomationActivity(body);
-
-    result.classList.remove("hidden");
+    renderResult(body);
     statusBox.textContent = `Lead #${body.lead_id} processed successfully.`;
     form.reset();
     loadLeads();
@@ -223,6 +199,39 @@ form.addEventListener("submit", async (event) => {
     statusBox.textContent = "Error: " + error.message;
   }
 });
+
+function renderResult(body, isPreview = false) {
+  const analysis = body.analysis;
+  document.getElementById("temperature").textContent = formatPriority(analysis.temperature);
+  document.getElementById("urgency").textContent = analysis.urgency;
+  document.getElementById("service-type").textContent = analysis.service_type;
+  document.getElementById("summary").textContent = analysis.summary;
+  document.getElementById("reason").textContent = analysis.reason;
+  document.getElementById("customer-reply").textContent = analysis.customer_reply;
+  document.getElementById("next-action").textContent = {
+    Hot: "Contact within 15 minutes.",
+    Warm: "Follow up today.",
+    Cold: "Add to a future follow-up list."
+  }[analysis.temperature] || "Review the inquiry and choose a follow-up time.";
+  result.classList.toggle("preview", isPreview);
+  document.getElementById("result-kicker").textContent = isPreview ? "SAMPLE PREVIEW" : "AUTOMATION COMPLETE";
+  document.getElementById("result-title").textContent = isPreview
+    ? "A clear next step for this lead"
+    : "What just happened";
+  document.getElementById("preview-notice").classList.toggle("hidden", !isPreview);
+
+  if (isPreview) {
+    document.getElementById("activity-timeline").classList.add("hidden");
+    document.getElementById("email-status").classList.add("hidden");
+  } else {
+    document.getElementById("activity-timeline").classList.remove("hidden");
+    document.getElementById("email-status").classList.remove("hidden");
+    setNotificationState(body.email_sent, body.email_status);
+    showAutomationActivity(body);
+  }
+
+  result.classList.remove("hidden");
+}
 
 function showAutomationActivity(body) {
   const lead = body.lead;
@@ -243,7 +252,11 @@ async function loadLeads() {
   const leads = await readJsonResponse(response);
   const tbody = document.getElementById("leads");
   tbody.innerHTML = "";
-  updateMetrics(leads);
+
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td class="empty-state" colspan="6">No saved inquiries yet.</td></tr>';
+    return;
+  }
 
   for (const lead of leads) {
     const row = document.createElement("tr");
@@ -261,17 +274,6 @@ async function loadLeads() {
 function statusOptions(current) {
   return ["New", "Contacted", "Scheduled", "Won", "Lost"]
     .map(status => `<option ${status === (current || "New") ? "selected" : ""}>${status}</option>`).join("");
-}
-
-function updateMetrics(leads) {
-  const total = leads.length;
-  const high = leads.filter(lead => lead.temperature === "Hot").length;
-  const fresh = leads.filter(lead => !lead.status || lead.status === "New").length;
-  const sent = total;
-  document.getElementById("total-leads").textContent = total;
-  document.getElementById("high-leads").textContent = high;
-  document.getElementById("new-leads").textContent = fresh;
-  document.getElementById("sent-leads").textContent = total ? `${Math.round((sent / total) * 100)}%` : "0%";
 }
 
 function setNotificationState(sent, message) {
@@ -315,11 +317,9 @@ document.getElementById("leads").addEventListener("change", async (event) => {
 document.querySelectorAll(".scenario").forEach(button => {
   button.addEventListener("click", () => {
     const scenario = scenarios[button.dataset.scenario];
-    Object.entries(scenario).forEach(([key, value]) => {
-      const field = form.elements[key];
-      if (field) field.value = value;
-    });
-    statusBox.textContent = "Scenario loaded. Submit it to run the automation.";
+    renderResult(scenario, true);
+    statusBox.textContent = "Sample preview loaded. No details were submitted or saved.";
+    result.scrollIntoView({block: "start"});
   });
 });
 
