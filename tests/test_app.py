@@ -50,6 +50,23 @@ class ContactEndpointTests(unittest.TestCase):
             "https://noitrez.com",
         )
 
+    @patch("app.send_email", return_value=(True, "Email sent successfully."))
+    def test_contact_notification_defaults_to_sales_address(self, send_email):
+        smtp_environment = {
+            "SMTP_ENABLED": "true",
+            "SMTP_HOST": "smtp.example.test",
+            "SMTP_PORT": "587",
+            "SMTP_USERNAME": "sender@example.test",
+            "SMTP_FROM": "sender@example.test",
+            "SMTP_PASSWORD": "test-password",
+        }
+        with patch.dict(os.environ, smtp_environment, clear=True):
+            response = self.client.post("/api/contact", json=self.payload())
+
+        self.assertEqual(response.status_code, 200)
+        email, _settings = send_email.call_args.args
+        self.assertEqual(email["To"], "sales@noitrez.com")
+
     @patch("app.send_email")
     def test_honeypot_is_accepted_without_sending(self, send_email):
         response = self.client.post("/api/contact", json=self.payload(website="bot"))

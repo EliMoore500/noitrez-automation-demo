@@ -70,7 +70,7 @@ def smtp_settings():
     password = "".join(os.getenv("SMTP_PASSWORD", "").split())
     recipient = os.getenv(
         "CONTACT_NOTIFICATION_EMAIL",
-        os.getenv("BUSINESS_NOTIFICATION_EMAIL", ""),
+        os.getenv("BUSINESS_NOTIFICATION_EMAIL", "sales@noitrez.com"),
     ).strip()
     use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
     use_ssl = os.getenv("SMTP_USE_SSL", "false").lower() == "true"

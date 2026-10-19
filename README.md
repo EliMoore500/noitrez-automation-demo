@@ -4,7 +4,7 @@
 
 The public demo uses three fictional HVAC scenarios to show an example lead priority, recommended next action, business summary, and draft customer reply. The sample buttons make no network request and collect no visitor information.
 
-The marketing site's audit form posts to `/api/contact`. The service validates the request and emails it to the configured Noitrez address; it does not store the form submission in the application database. Public lead-analysis, listing, update, and delete routes are disabled.
+The marketing site's audit form posts to `/api/contact`. The service validates the request and emails it to `sales@noitrez.com` by default; after submission, the visitor also gets a prefilled optional email draft. The form submission is not stored in the application database. Public lead-analysis, listing, update, and delete routes are disabled.
 
 ## Windows setup
 
@@ -22,7 +22,7 @@ Open http://127.0.0.1:5000 to preview the sample scenarios.
 
 ## Contact email configuration
 
-The homepage form requires SMTP configuration in the Render dashboard or local `.env`:
+The homepage form requires SMTP configuration in the Render dashboard or local `.env` for the automatic notification. The recipient defaults to `sales@noitrez.com`:
 
 - `SMTP_ENABLED=true`
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`
@@ -30,7 +30,7 @@ The homepage form requires SMTP configuration in the Render dashboard or local `
 - `CONTACT_NOTIFICATION_EMAIL=sales@noitrez.com`
 - `CONTACT_ALLOWED_ORIGINS=https://noitrez.com,https://www.noitrez.com`
 
-For a Gmail alias, use the owning Google account as `SMTP_USERNAME` and an App Password generated for that account. Set `SMTP_FROM` to a verified "Send mail as" alias. The form reports delivery failures and offers the direct email fallback.
+For a Gmail alias, use the owning Google account as `SMTP_USERNAME` and an App Password generated for that account. Set `SMTP_FROM` to a verified "Send mail as" alias. If SMTP is unavailable, the form reports the failure and keeps the prefilled email draft available as a fallback.
 
 If SMTP on port 587 is unreachable, use Gmail SSL with `SMTP_PORT=465`, `SMTP_USE_TLS=false`, and `SMTP_USE_SSL=true`.
 
