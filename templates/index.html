@@ -4,8 +4,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="See how Noitrez helps small Northern Virginia service businesses prioritize new inquiries and prepare faster follow-up.">
+  <meta name="description" content="Preview how Noitrez helps Northern Virginia HVAC teams prioritize inquiries and prepare faster follow-up.">
   <title>Noitrez | Northern Virginia Lead Follow-Up Demo</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://noitrez-automation-demo.onrender.com/">
+  <meta property="og:title" content="Noitrez | HVAC Lead Follow-Up Preview">
+  <meta property="og:description" content="Explore a sample workflow for prioritizing HVAC inquiries and preparing a timely response.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://noitrez-automation-demo.onrender.com/">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -13,78 +19,35 @@
     <a class="wordmark" href="https://noitrez.com/">Noitrez<span>.</span></a>
     <div class="site-nav-links">
       <a href="https://noitrez.com/">Main site</a>
-      <a class="nav-audit" href="mailto:sales@noitrez.com?subject=Free%20Automation%20Audit">Free Audit</a>
+      <a class="nav-audit" href="https://noitrez.com/#contact">Free Audit</a>
     </div>
   </nav>
   <main class="container">
     <header class="hero">
       <div>
-        <div class="eyebrow">NOITREZ / NORTHERN VIRGINIA</div>
+        <div class="eyebrow">NOITREZ / HVAC LEAD FOLLOW-UP</div>
         <h1>Every inquiry gets a next step.</h1>
-        <p class="business-outcome">Practical lead follow-up for small HVAC teams in Northern Virginia: spot urgent requests, prepare a thoughtful reply, and spend less time on repetitive admin.</p>
+        <p class="business-outcome">A sample of how Noitrez helps Northern Virginia HVAC teams prioritize urgent inquiries and prepare timely follow-up, without adding repetitive admin.</p>
         <div class="hero-actions">
-          <a class="hero-demo" href="#lead-demo">See a sample analysis <span aria-hidden="true">↓</span></a>
-          <a class="hero-audit" href="mailto:sales@noitrez.com?subject=Free%20Automation%20Audit">Get a free automation audit</a>
+          <a class="hero-demo" href="#lead-demo">See sample analysis</a>
+          <a class="hero-audit" href="https://noitrez.com/#contact">Request a free workflow audit</a>
         </div>
       </div>
-      <div class="live-indicator"><span></span> Automation active</div>
+      <div class="live-indicator"><span></span> Sample workflow</div>
     </header>
 
     <section class="card demo-card" id="lead-demo">
       <div class="section-heading form-heading">
         <div><div class="section-kicker">INTERACTIVE EXAMPLE</div><h2>See a lead handled</h2><p class="muted">Choose a local service scenario to preview the outcome instantly. No form or AI request needed.</p></div>
-        <div class="scenario-group" aria-label="Sample lead scenarios"><span class="muted">Choose a sample</span><button class="scenario" data-scenario="emergency" type="button">Urgent AC repair</button><button class="scenario" data-scenario="installation" type="button">System estimate</button><button class="scenario" data-scenario="maintenance" type="button">Seasonal tune-up</button></div>
+        <div class="scenario-group" role="group" aria-label="Sample lead scenarios"><span class="muted">Choose a sample</span><button class="scenario" data-scenario="emergency" type="button" aria-pressed="false">Urgent AC repair</button><button class="scenario" data-scenario="installation" type="button" aria-pressed="false">System estimate</button><button class="scenario" data-scenario="maintenance" type="button" aria-pressed="false">Seasonal tune-up</button></div>
       </div>
-      <div class="live-form-intro"><h3>Or analyze your own inquiry</h3><p class="muted">Live submissions are sent to OpenAI for analysis, saved in this demo's lead pipeline, and may trigger configured email notifications. Use fictional details and avoid sensitive information.</p></div>
-      <form id="lead-form">
-        <div class="grid">
-          <label>Name<input name="name" required placeholder="Sarah Johnson"></label>
-          <label>Email<input name="email" type="email" required placeholder="sarah@example.com"></label>
-          <label>Phone<input name="phone" placeholder="703-555-0123"></label>
-          <label>Service
-            <select name="service">
-              <option>AC repair</option>
-              <option>Heating repair</option>
-              <option>HVAC maintenance</option>
-              <option>New HVAC installation</option>
-              <option>Indoor air quality</option>
-              <option>Other</option>
-            </select>
-          </label>
-        </div>
-        <label>Customer message
-          <textarea name="message" required placeholder="My AC stopped working today and the house is getting very hot."></textarea>
-        </label>
-        <button type="submit" class="primary-action">Run live analysis</button>
-      </form>
-      <div id="status"></div>
+      <p class="sample-only-note">This is an illustrative preview. No personal information is requested, submitted, or stored.</p>
+      <p id="status" role="status" aria-live="polite"></p>
     </section>
 
-    <section id="result" class="card hidden">
-      <div class="section-kicker" id="result-kicker">AUTOMATION COMPLETE</div><h2 id="result-title">What just happened</h2>
-      <p class="preview-notice hidden" id="preview-notice">Illustrative sample only. Nothing was sent to AI, saved, or emailed.</p>
-      <div class="activity-timeline" id="activity-timeline" aria-label="Lead automation activity">
-        <div class="activity-step">
-          <div class="activity-marker">✓</div>
-          <div><strong>Lead captured</strong><p id="activity-captured">Inquiry received</p></div>
-        </div>
-        <div class="activity-step">
-          <div class="activity-marker">✓</div>
-          <div><strong>AI analyzed lead</strong><p id="activity-analyzed">Priority and urgency identified</p></div>
-        </div>
-        <div class="activity-step">
-          <div class="activity-marker">✓</div>
-          <div><strong>Lead stored</strong><p>Added to lead pipeline</p></div>
-        </div>
-        <div class="activity-step" id="activity-notification-step">
-          <div class="activity-marker">✓</div>
-          <div><strong>Business notified</strong><p id="activity-notified">Email sent to staff</p></div>
-        </div>
-        <div class="activity-step">
-          <div class="activity-marker">✓</div>
-          <div><strong>Customer response generated</strong><p id="activity-response">Personalized reply ready</p></div>
-        </div>
-      </div>
+    <section id="result" class="card hidden" role="region" aria-labelledby="result-title" tabindex="-1">
+      <div class="section-kicker">SAMPLE PREVIEW</div><h2 id="result-title" tabindex="-1">A clear next step for this lead</h2>
+      <p class="preview-notice">Illustrative sample only. Nothing is sent to AI, saved, or emailed.</p>
       <div class="result-divider"></div>
       <h2>Suggested next action</h2>
       <p class="next-action" id="next-action"></p>
@@ -99,36 +62,18 @@
       <p id="reason"></p>
       <h3>Customer reply</h3>
       <div class="reply" id="customer-reply"></div>
-      <p class="notification-state" id="email-status"></p>
+      <a class="result-cta" href="https://noitrez.com/#contact">Discuss a workflow like this <span aria-hidden="true">→</span></a>
     </section>
 
-    <details class="pipeline">
-      <summary>Lead pipeline <span>Review, update, or remove saved inquiries</span></summary>
-      <section class="card">
-        <div class="section-heading">
-          <div>
-            <h2>Saved inquiries</h2>
-            <p class="muted">Move each lead from first contact to outcome.</p>
-          </div>
-          <button class="secondary" id="refresh" type="button">Refresh</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Lead</th><th>Service</th><th>Priority</th><th>Summary</th><th>Status</th><th></th></tr></thead>
-            <tbody id="leads"></tbody>
-          </table>
-        </div>
-      </section>
-    </details>
-
     <section class="closing-cta">
-      <div><div class="section-kicker">FOR YOUR BUSINESS</div><h2>Start with one repetitive task.</h2><p class="muted">Get a free automation audit for your Northern Virginia business.</p></div>
-      <a href="https://noitrez.com/#contact">Talk through your workflow <span aria-hidden="true">→</span></a>
+      <div><div class="section-kicker">FOR HVAC TEAMS</div><h2>Start with one repetitive task.</h2><p class="muted">Explore a lead follow-up workflow for your Northern Virginia HVAC business.</p></div>
+      <a href="https://noitrez.com/#contact">Request a free workflow audit <span aria-hidden="true">→</span></a>
     </section>
   </main>
 
+  <footer class="site-footer"><a href="https://noitrez.com/">Noitrez</a><a href="https://noitrez.com/privacy.html">Privacy</a><span>Illustrative sample workflow</span></footer>
+
 <script>
-const form = document.getElementById("lead-form");
 const statusBox = document.getElementById("status");
 const result = document.getElementById("result");
 const scenarios = {
@@ -161,55 +106,13 @@ const scenarios = {
   }
 };
 
-function formatPriority(value) {
-  const text = String(value || "").trim();
-  const lookup = {
+function renderResult(body) {
+  const analysis = body.analysis;
+  document.getElementById("temperature").textContent = {
     Hot: "High",
     Warm: "Medium",
     Cold: "Low"
-  };
-  return lookup[text] || text;
-}
-
-async function readJsonResponse(response) {
-  const text = await response.text();
-  let body;
-  try {
-    body = text ? JSON.parse(text) : {};
-  } catch (error) {
-    throw new Error(`Server returned ${response.status} ${response.statusText} instead of JSON.`);
-  }
-  if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
-  return body;
-}
-
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  statusBox.textContent = "Analyzing lead...";
-  result.classList.add("hidden");
-
-  const data = Object.fromEntries(new FormData(form).entries());
-
-  try {
-    const response = await fetch("/api/leads", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(data)
-    });
-    const body = await readJsonResponse(response);
-
-    renderResult(body);
-    statusBox.textContent = `Lead #${body.lead_id} processed successfully.`;
-    form.reset();
-    loadLeads();
-  } catch (error) {
-    statusBox.textContent = "Error: " + error.message;
-  }
-});
-
-function renderResult(body, isPreview = false) {
-  const analysis = body.analysis;
-  document.getElementById("temperature").textContent = formatPriority(analysis.temperature);
+  }[analysis.temperature] || analysis.temperature;
   document.getElementById("urgency").textContent = analysis.urgency;
   document.getElementById("service-type").textContent = analysis.service_type;
   document.getElementById("summary").textContent = analysis.summary;
@@ -220,128 +123,19 @@ function renderResult(body, isPreview = false) {
     Warm: "Follow up today.",
     Cold: "Add to a future follow-up list."
   }[analysis.temperature] || "Review the inquiry and choose a follow-up time.";
-  result.classList.toggle("preview", isPreview);
-  document.getElementById("result-kicker").textContent = isPreview ? "SAMPLE PREVIEW" : "AUTOMATION COMPLETE";
-  document.getElementById("result-title").textContent = isPreview
-    ? "A clear next step for this lead"
-    : "What just happened";
-  document.getElementById("preview-notice").classList.toggle("hidden", !isPreview);
-
-  if (isPreview) {
-    document.getElementById("activity-timeline").classList.add("hidden");
-    document.getElementById("email-status").classList.add("hidden");
-  } else {
-    document.getElementById("activity-timeline").classList.remove("hidden");
-    document.getElementById("email-status").classList.remove("hidden");
-    setNotificationState(body.email_sent, body.email_status);
-    showAutomationActivity(body);
-  }
-
   result.classList.remove("hidden");
+  document.getElementById("result-title").focus({preventScroll: true});
+  result.scrollIntoView({block: "start", behavior: "smooth"});
+  statusBox.textContent = "Sample preview loaded. No information was sent or stored.";
 }
-
-function showAutomationActivity(body) {
-  const lead = body.lead;
-  const analysis = body.analysis;
-  document.getElementById("activity-captured").textContent = `${lead.name} - ${lead.service}`;
-  document.getElementById("activity-analyzed").textContent = `${formatPriority(analysis.temperature)} priority · ${analysis.urgency} · ${analysis.temperature} lead`;
-  document.getElementById("activity-notified").textContent = body.email_sent
-    ? "Email sent to staff"
-    : "Email not sent - review notification settings";
-  document.getElementById("activity-notification-step").classList.toggle("failed", !body.email_sent);
-  document.getElementById("activity-response").textContent = body.customer_email_sent
-    ? "Personalized reply emailed to customer"
-    : "Personalized reply ready to review";
-}
-
-async function loadLeads() {
-  const response = await fetch("/api/leads");
-  const leads = await readJsonResponse(response);
-  const tbody = document.getElementById("leads");
-  tbody.innerHTML = "";
-
-  if (!leads.length) {
-    tbody.innerHTML = '<tr><td class="empty-state" colspan="6">No saved inquiries yet.</td></tr>';
-    return;
-  }
-
-  for (const lead of leads) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td><strong>${escapeHtml(lead.name)}</strong><small>${escapeHtml(lead.email)}</small></td>
-      <td>${escapeHtml(lead.service)}</td>
-      <td><span class="badge">${escapeHtml(formatPriority(lead.temperature))}</span></td>
-      <td>${escapeHtml(lead.summary)}</td>
-      <td><select class="status-select" data-lead-id="${lead.id}">${statusOptions(lead.status)}</select></td>
-      <td><button class="danger delete-lead" data-lead-id="${lead.id}" type="button" aria-label="Delete ${escapeHtml(lead.name)}">Delete</button></td>`;
-    tbody.appendChild(row);
-  }
-}
-
-function statusOptions(current) {
-  return ["New", "Contacted", "Scheduled", "Won", "Lost"]
-    .map(status => `<option ${status === (current || "New") ? "selected" : ""}>${status}</option>`).join("");
-}
-
-function setNotificationState(sent, message) {
-  const notification = document.getElementById("email-status");
-  notification.className = `notification-state ${sent ? "success" : "warning"}`;
-  notification.textContent = `${sent ? "Notification sent" : "Notification status"}: ${message}`;
-}
-
-document.getElementById("leads").addEventListener("click", async (event) => {
-  const button = event.target.closest(".delete-lead");
-  if (!button) return;
-
-  const leadId = button.dataset.leadId;
-  button.disabled = true;
-  try {
-    const response = await fetch(`/api/leads/${leadId}`, {method: "DELETE"});
-    await readJsonResponse(response);
-    await loadLeads();
-  } catch (error) {
-    button.disabled = false;
-    statusBox.textContent = "Error: " + error.message;
-  }
-});
-
-document.getElementById("leads").addEventListener("change", async (event) => {
-  if (!event.target.classList.contains("status-select")) return;
-  const select = event.target;
-  try {
-    const response = await fetch(`/api/leads/${select.dataset.leadId}`, {
-      method: "PATCH",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({status: select.value})
-    });
-    await readJsonResponse(response);
-    await loadLeads();
-  } catch (error) {
-    statusBox.textContent = "Error: " + error.message;
-  }
-});
 
 document.querySelectorAll(".scenario").forEach(button => {
   button.addEventListener("click", () => {
-    const scenario = scenarios[button.dataset.scenario];
-    renderResult(scenario, true);
-    statusBox.textContent = "Sample preview loaded. No details were submitted or saved.";
-    result.scrollIntoView({block: "start"});
+    document.querySelectorAll(".scenario").forEach(item => {
+      item.setAttribute("aria-pressed", String(item === button));
+    });
+    renderResult(scenarios[button.dataset.scenario]);
   });
-});
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-document.getElementById("refresh").addEventListener("click", loadLeads);
-loadLeads().catch(error => {
-  statusBox.textContent = "Error loading leads: " + error.message;
 });
 </script>
 </body>

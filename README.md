@@ -1,15 +1,10 @@
-# Noitrez AI Lead Automation Demo
+# Noitrez HVAC Workflow Preview
 
 ## What it does
 
-1. Accepts a website lead.
-2. Sends the lead to OpenAI for classification.
-3. Classifies the lead as Hot, Warm, or Cold.
-4. Determines urgency and service type.
-5. Generates a one-sentence business summary.
-6. Generates a professional customer reply.
-7. Stores the lead in a local SQLite database.
-8. Optionally emails the business automatically through SMTP.
+The public demo uses three fictional HVAC scenarios to show an example lead priority, recommended next action, business summary, and draft customer reply. The sample buttons make no network request and collect no visitor information.
+
+The marketing site's audit form posts to `/api/contact`. The service validates the request and emails it to the configured Noitrez address; it does not store the form submission in the application database. Public lead-analysis, listing, update, and delete routes are disabled.
 
 ## Windows setup
 
@@ -18,51 +13,37 @@ Open PowerShell in this folder.
 ```powershell
 py -m venv .venv
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-```
-
-Then edit `.env` and replace:
-
-`PASTE_YOUR_OPENAI_API_KEY_HERE`
-
-with your OpenAI API key.
-
-Start the app:
-
-```powershell
 python app.py
 ```
 
-Open:
+Open http://127.0.0.1:5000 to preview the sample scenarios.
 
-http://127.0.0.1:5000
+## Contact email configuration
 
-## Email
+The homepage form requires SMTP configuration in the Render dashboard or local `.env`:
 
-The demo works without SMTP. It stores the lead and displays the generated response.
+- `SMTP_ENABLED=true`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`
+- `SMTP_FROM` (optional; defaults to `SMTP_USERNAME`)
+- `CONTACT_NOTIFICATION_EMAIL=sales@noitrez.com`
+- `CONTACT_ALLOWED_ORIGINS=https://noitrez.com,https://www.noitrez.com`
 
-To turn on automatic business notification emails, set `SMTP_ENABLED=true` and fill in the SMTP settings in `.env`.
+For a Gmail alias, use the owning Google account as `SMTP_USERNAME` and an App Password generated for that account. Set `SMTP_FROM` to a verified "Send mail as" alias. The form reports delivery failures and offers the direct email fallback.
 
-For a Gmail alias, set `SMTP_USERNAME` to the owning Google account, such as `elijah@noitrez.com`, and use an App Password generated for that account. Set `SMTP_FROM` to the alias, such as `hello@noitrez.com`, after adding and verifying it as a Send mail as address in Gmail. Set `CUSTOMER_REPLY_ENABLED=true` to email the AI-generated reply to the customer after the staff notification succeeds.
+If SMTP on port 587 is unreachable, use Gmail SSL with `SMTP_PORT=465`, `SMTP_USE_TLS=false`, and `SMTP_USE_SSL=true`.
 
-The app limits AI output to 350 tokens, uses structured JSON output, rejects oversized submissions before calling OpenAI, and reuses an identical lead when `CACHE_DUPLICATE_LEADS=true` (the default). Set `CACHE_DUPLICATE_LEADS=false` if repeated submissions should be analyzed again.
+The contact endpoint allows five attempts per IP per 15-minute window. This limiter is in memory and assumes the Render service's configured single worker; use a shared rate-limit store before scaling to multiple workers or instances. Never commit `.env` or SMTP credentials; `.env` is listed in `.gitignore`.
 
-If the hosting service reports `Network is unreachable` while connecting to Gmail on port 587, use Gmail SSL instead: set `SMTP_PORT=465`, `SMTP_USE_TLS=false`, and `SMTP_USE_SSL=true` in the deployment environment.
+## Privacy and old demo data
 
-Do not put `.env` in GitHub. It is already listed in `.gitignore`.
+The public demo no longer accepts visitor inquiries. The marketing contact form is emailed and is not stored by the application. If `data/leads.db` contains old demo submissions, the app no longer exposes them; review and remove that file manually only after confirming you no longer need its contents.
 
-## GitHub
+## Checks
 
-After testing:
+Run the contact endpoint regression tests with:
 
 ```powershell
-git init
-git add .
-git commit -m "Create Noitrez AI lead automation demo"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/noitrez-automation-demo.git
-git push -u origin main
+python -m unittest discover -s tests -v
 ```
-
-Create the GitHub repository first, with the exact name `noitrez-automation-demo`, and do NOT initialize it with a README, .gitignore, or license because those files already exist locally.
