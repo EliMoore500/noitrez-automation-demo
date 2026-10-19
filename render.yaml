@@ -9,3 +9,7 @@ services:
         value: sales@noitrez.com
       - key: CONTACT_ALLOWED_ORIGINS
         value: https://noitrez.com,https://www.noitrez.com
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        value: "Noitrez <hello@noitrez.com>"

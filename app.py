@@ -1,9 +1,11 @@
+import json
 import os
 import re
-import smtplib
 import time
 from collections import defaultdict, deque
 from email.message import EmailMessage
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
@@ -59,55 +61,50 @@ def handle_server_error(error):
     return error
 
 
-def smtp_settings():
-    if os.getenv("SMTP_ENABLED", "false").lower() != "true":
-        return None, "SMTP email is disabled. Lead was saved successfully."
-
-    host = os.getenv("SMTP_HOST", "").strip()
-    port = int(os.getenv("SMTP_PORT", "587"))
-    username = os.getenv("SMTP_USERNAME", "").strip()
-    sender = os.getenv("SMTP_FROM", username).strip()
-    password = "".join(os.getenv("SMTP_PASSWORD", "").split())
+def email_settings():
+    api_key = os.getenv("RESEND_API_KEY", "").strip()
+    sender = os.getenv("RESEND_FROM", "").strip()
     recipient = os.getenv(
         "CONTACT_NOTIFICATION_EMAIL",
         os.getenv("BUSINESS_NOTIFICATION_EMAIL", "sales@noitrez.com"),
     ).strip()
-    use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
-    use_ssl = os.getenv("SMTP_USE_SSL", "false").lower() == "true"
 
-    if not all([host, username, sender, password, recipient]):
-        return None, "SMTP is enabled but one or more SMTP settings are missing in .env"
+    if not all([api_key, sender, recipient]):
+        return None, "Resend API key or verified sender is not configured."
 
     return {
-        "host": host,
-        "port": port,
-        "username": username,
+        "api_key": api_key,
         "sender": sender,
-        "password": password,
         "recipient": recipient,
-        "use_tls": use_tls,
-        "use_ssl": use_ssl,
     }, ""
 
 
 def send_email(message, settings):
+    payload = {
+        "from": settings["sender"],
+        "to": [settings["recipient"]],
+        "subject": str(message["Subject"]),
+        "text": message.get_content(),
+        "reply_to": str(message["Reply-To"]),
+    }
+    request = Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {settings['api_key']}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
     try:
-        smtp_client = smtplib.SMTP_SSL if settings["use_ssl"] else smtplib.SMTP
-        with smtp_client(settings["host"], settings["port"], timeout=20) as server:
-            if settings["use_tls"] and not settings["use_ssl"]:
-                server.starttls()
-            server.login(settings["username"], settings["password"])
-            server.send_message(message)
-    except smtplib.SMTPAuthenticationError:
-        app.logger.exception("SMTP authentication failed")
-        return False, (
-            "SMTP authentication failed. The Gmail App Password must belong to "
-            f"{settings['username']}. Generate a new App Password while signed "
-            "into that exact Google account, then restart the Flask app."
-        )
-    except (OSError, smtplib.SMTPException) as exc:
-        app.logger.exception("SMTP send failed")
-        return False, f"SMTP send failed: {exc}"
+        with urlopen(request, timeout=20) as response:
+            response.read()
+    except HTTPError as error:
+        app.logger.error("Resend rejected contact email with HTTP %s", error.code)
+        return False, "Email provider rejected the message."
+    except (OSError, URLError):
+        app.logger.exception("Resend contact email request failed")
+        return False, "Email provider could not be reached."
 
     return True, "Email sent successfully."
 
@@ -156,7 +153,7 @@ def submit_contact_request():
         return jsonify({"error": "Too many requests. Please try again later."}), 429
     attempts.append(now)
 
-    settings, _status = smtp_settings()
+    settings, _status = email_settings()
     if settings is None:
         return jsonify({
             "error": "The contact service is temporarily unavailable. Please email sales@noitrez.com.",

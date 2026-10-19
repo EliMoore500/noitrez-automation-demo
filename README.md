@@ -22,19 +22,16 @@ Open http://127.0.0.1:5000 to preview the sample scenarios.
 
 ## Contact email configuration
 
-The homepage form requires SMTP configuration in the Render dashboard or local `.env` for the automatic notification. The recipient defaults to `sales@noitrez.com`:
+The homepage form uses Resend's HTTPS API to email the request to `sales@noitrez.com`; the visitor also gets a prefilled optional email draft. Configure these variables in Render or local `.env`:
 
-- `SMTP_ENABLED=true`
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`
-- `SMTP_FROM` (optional; defaults to `SMTP_USERNAME`)
+- `RESEND_API_KEY` (secret; enter it directly in Render)
+- `RESEND_FROM=Noitrez <hello@noitrez.com>` (must be a sender on a domain verified in Resend)
 - `CONTACT_NOTIFICATION_EMAIL=sales@noitrez.com`
 - `CONTACT_ALLOWED_ORIGINS=https://noitrez.com,https://www.noitrez.com`
 
-For a Gmail alias, use the owning Google account as `SMTP_USERNAME` and an App Password generated for that account. Set `SMTP_FROM` to a verified "Send mail as" alias. If SMTP is unavailable, the form reports the failure and keeps the prefilled email draft available as a fallback.
+Verify `noitrez.com` in Resend and publish the DNS records Resend provides before expecting delivery. If the API is unavailable or rejects the message, the form reports the failure and keeps the prefilled email draft available as a fallback.
 
-If SMTP on port 587 is unreachable, use Gmail SSL with `SMTP_PORT=465`, `SMTP_USE_TLS=false`, and `SMTP_USE_SSL=true`.
-
-The contact endpoint allows five attempts per IP per 15-minute window. This limiter is in memory and assumes the Render service's configured single worker; use a shared rate-limit store before scaling to multiple workers or instances. Never commit `.env` or SMTP credentials; `.env` is listed in `.gitignore`.
+The contact endpoint allows five attempts per IP per 15-minute window. This limiter is in memory and assumes the Render service's configured single worker; use a shared rate-limit store before scaling to multiple workers or instances. Never commit `.env` or API keys; `.env` is listed in `.gitignore`.
 
 ## Privacy and old demo data
 
