@@ -4,12 +4,3 @@ services:
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app:app
-    envVars:
-      - key: CONTACT_NOTIFICATION_EMAIL
-        value: sales@noitrez.com
-      - key: CONTACT_ALLOWED_ORIGINS
-        value: https://noitrez.com,https://www.noitrez.com
-      - key: RESEND_API_KEY
-        sync: false
-      - key: RESEND_FROM
-        value: "Noitrez <hello@noitrez.com>"
