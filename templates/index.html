@@ -29,7 +29,7 @@
         <h1>Respond faster. Miss fewer leads. Spend less time.</h1>
         <p class="business-outcome">A sample of how Noitrez helps Northern Virginia HVAC teams prioritize urgent inquiries and prepare timely follow-up, without adding repetitive admin.</p>
         <div class="hero-actions">
-          <a class="hero-demo" href="#lead-demo">See sample analysis</a>
+          <a class="hero-demo" href="#lead-demo">Try a sample inquiry</a>
           <a class="hero-audit" href="https://noitrez.com/#contact">Request a free workflow audit</a>
         </div>
       </div>
@@ -38,8 +38,8 @@
 
     <section class="card demo-card" id="lead-demo">
       <div class="section-heading form-heading">
-        <div><div class="section-kicker">INTERACTIVE EXAMPLE</div><h2>See a lead handled</h2><p class="muted">Try a fictional scenario or enter an inquiry to preview AI-assisted triage.</p></div>
-        <div class="scenario-group" role="group" aria-label="Sample lead scenarios"><span class="muted">Choose a sample</span><button class="scenario" data-scenario="emergency" type="button" aria-pressed="false">Urgent AC repair</button><button class="scenario" data-scenario="installation" type="button" aria-pressed="false">System estimate</button><button class="scenario" data-scenario="maintenance" type="button" aria-pressed="false">Seasonal tune-up</button></div>
+        <div><div class="section-kicker">INTERACTIVE EXAMPLE</div><h2>Try a sample inquiry</h2><p class="muted">Load a fictional inquiry into the form, edit it if you like, then run the AI analysis.</p></div>
+        <div class="scenario-group" role="group" aria-label="Fill the form with a sample inquiry"><span class="muted">Fill with a fictional inquiry</span><button class="scenario" data-scenario="emergency" type="button" aria-pressed="false">Urgent AC repair</button><button class="scenario" data-scenario="installation" type="button" aria-pressed="false">System estimate</button><button class="scenario" data-scenario="maintenance" type="button" aria-pressed="false">Seasonal tune-up</button></div>
       </div>
       <div class="live-form-intro">
         <h3>Analyze an inquiry</h3>
@@ -105,31 +105,25 @@ const result = document.getElementById("result");
 const submitButton = form.querySelector("button[type='submit']");
 const scenarios = {
   emergency: {
-    lead: {name: "Sample homeowner", service: "AC repair"},
-    analysis: {
-      temperature: "Hot", urgency: "Urgent", service_type: "AC repair",
-      summary: "Cooling stopped during warm weather; prompt follow-up is recommended.",
-      reason: "The customer reports a complete loss of cooling and asks for help soon.",
-      customer_reply: "Thanks for reaching out. We received your AC repair request and will review the next available options with you."
-    }
+    name: "Sample homeowner",
+    email: "homeowner@example.test",
+    phone: "703-555-0100",
+    service: "AC repair",
+    message: "My AC stopped cooling this afternoon. Please contact me about an appointment."
   },
   installation: {
-    lead: {name: "Sample homeowner", service: "New HVAC installation"},
-    analysis: {
-      temperature: "Warm", urgency: "Normal", service_type: "Installation estimate",
-      summary: "The customer is planning a system replacement and wants an efficient installation estimate.",
-      reason: "This is a clear buying interest with a future timeframe, rather than an immediate outage.",
-      customer_reply: "Thanks for considering us for your system replacement. We can learn more about your home and discuss options for an estimate."
-    }
+    name: "Sample homeowner",
+    email: "homeowner@example.test",
+    phone: "703-555-0100",
+    service: "New HVAC installation",
+    message: "We are planning to replace our heating and cooling system this year. Could we discuss an estimate?"
   },
   maintenance: {
-    lead: {name: "Sample homeowner", service: "HVAC maintenance"},
-    analysis: {
-      temperature: "Warm", urgency: "Normal", service_type: "Seasonal maintenance",
-      summary: "The customer wants to schedule routine maintenance before the season changes.",
-      reason: "The request is specific and actionable, with no urgent equipment failure reported.",
-      customer_reply: "Thanks for getting in touch. We can help you plan seasonal maintenance and explain what the visit includes."
-    }
+    name: "Sample homeowner",
+    email: "homeowner@example.test",
+    phone: "703-555-0100",
+    service: "HVAC maintenance",
+    message: "I would like to arrange seasonal maintenance before the weather changes. What does a visit include?"
   }
 };
 
@@ -164,7 +158,7 @@ function renderResult(body, isAiAnalysis = false) {
   document.getElementById("result-title").focus({preventScroll: true});
   result.scrollIntoView({block: "start", behavior: "smooth"});
   statusBox.textContent = isAiAnalysis
-    ? "AI analysis complete. The inquiry was not emailed or saved."
+    ? "AI analysis complete. Review the result below; nothing was emailed or saved."
     : "Sample preview loaded. No information was sent or stored.";
 }
 
@@ -196,10 +190,15 @@ form.addEventListener("submit", async event => {
 
 document.querySelectorAll(".scenario").forEach(button => {
   button.addEventListener("click", () => {
+    const scenario = scenarios[button.dataset.scenario];
     document.querySelectorAll(".scenario").forEach(item => {
       item.setAttribute("aria-pressed", String(item === button));
     });
-    renderResult(scenarios[button.dataset.scenario]);
+    for (const [name, value] of Object.entries(scenario)) {
+      form.elements.namedItem(name).value = value;
+    }
+    result.classList.add("hidden");
+    statusBox.textContent = "Fictional sample loaded into the form. Review the details, agree to the AI demo, and run the analysis.";
   });
 });
 </script>

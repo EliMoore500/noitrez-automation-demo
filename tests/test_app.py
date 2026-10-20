@@ -90,7 +90,7 @@ class DemoAIAnalysisTests(unittest.TestCase):
         self.assertIn('name="service"', page)
         self.assertIn('name="message"', page)
         self.assertIn("OpenAI", page)
-        self.assertIn("not emailed or saved", page.lower())
+        self.assertIn("nothing was emailed or saved", page.lower())
 
     def test_contact_email_api_remains_disabled(self):
         self.assertEqual(self.client.post("/api/contact", json={}).status_code, 404)
