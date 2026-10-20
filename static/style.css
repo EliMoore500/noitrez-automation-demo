@@ -89,6 +89,9 @@ button:disabled { cursor: wait; opacity: .6; }
 button.scenario { padding: 8px 10px; font-size: 11px; }
 button.scenario[aria-pressed="true"] { border-color: var(--accent); background: #171323; color: #d2c7ff; }
 .sample-only-note { margin: 14px 0 0; font-size: 13px; }
+.analysis-consent { display: flex; align-items: flex-start; gap: 10px; margin-top: 2px; }
+.analysis-consent input { width: 18px; height: 18px; flex: 0 0 auto; margin: 3px 0 0; }
+.analysis-consent span { color: var(--muted); }
 .result-cta { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; margin-top: 20px; color: #c6b9ff; font-weight: 700; text-decoration: none; }
 .result-cta:hover { color: #fff; }
 .site-footer { display: flex; justify-content: space-between; gap: 18px; width: min(1100px, 90%); margin: 0 auto; padding: 20px 0 28px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }

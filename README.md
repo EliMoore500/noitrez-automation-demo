@@ -2,7 +2,7 @@
 
 ## What it does
 
-The public demo uses three fictional HVAC scenarios to show an example lead priority, recommended next action, business summary, and draft customer reply. The sample buttons make no network request and collect no visitor information.
+The public demo has three fictional HVAC previews and an optional live AI analysis form. The live form sends only the submitted name, service, and message to OpenAI; email and phone are validated by the demo but are not sent to the model. The app does not store submissions or send email.
 
 The marketing site's audit form opens a prefilled email draft to `sales@noitrez.com`. The visitor reviews it and presses Send in their email app; the website does not submit or store their form details.
 
@@ -20,13 +20,17 @@ python app.py
 
 Open http://127.0.0.1:5000 to preview the sample scenarios.
 
+## AI analysis configuration
+
+Set `OPENAI_API_KEY` in the Render service environment (or local `.env`) to enable live analysis. `OPENAI_MODEL` is optional and defaults to `gpt-4o-mini`. Never commit `.env` or API keys. The analysis endpoint is limited to five requests per IP per 15-minute window.
+
 ## Contact form
 
 The form uses a `mailto:` draft addressed to `sales@noitrez.com`. Visitors must review and send it in their own email app. No email service credentials or server-side contact endpoint are required.
 
 ## Privacy and old demo data
 
-The public demo uses fictional sample scenarios. Contact information remains in the visitor's email app until they choose to send it. If `data/leads.db` contains old demo submissions, the app no longer exposes them; review and remove that file manually only after confirming you no longer need its contents.
+The public demo offers fictional sample scenarios and an AI preview. For live analysis, name, service, and message are sent to OpenAI; email and phone are not sent to OpenAI. Submissions are not stored or emailed by this app. Use fictional demo details, not sensitive or actual customer information. Contact form details on the marketing site remain in the visitor's email app until they choose to send them. If `data/leads.db` contains old demo submissions, the app no longer exposes them; review and remove that file manually only after confirming you no longer need its contents.
 
 ## Checks
 

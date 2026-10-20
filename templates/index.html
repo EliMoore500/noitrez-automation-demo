@@ -38,16 +38,41 @@
 
     <section class="card demo-card" id="lead-demo">
       <div class="section-heading form-heading">
-        <div><div class="section-kicker">INTERACTIVE EXAMPLE</div><h2>See a lead handled</h2><p class="muted">Choose a local service scenario to preview the outcome instantly. No form or AI request needed.</p></div>
+        <div><div class="section-kicker">INTERACTIVE EXAMPLE</div><h2>See a lead handled</h2><p class="muted">Try a fictional scenario or enter an inquiry to preview AI-assisted triage.</p></div>
         <div class="scenario-group" role="group" aria-label="Sample lead scenarios"><span class="muted">Choose a sample</span><button class="scenario" data-scenario="emergency" type="button" aria-pressed="false">Urgent AC repair</button><button class="scenario" data-scenario="installation" type="button" aria-pressed="false">System estimate</button><button class="scenario" data-scenario="maintenance" type="button" aria-pressed="false">Seasonal tune-up</button></div>
       </div>
-      <p class="sample-only-note">This is an illustrative preview. No personal information is requested, submitted, or stored.</p>
+      <div class="live-form-intro">
+        <h3>Analyze an inquiry</h3>
+        <p class="muted">This demo sends the name, service, and message you enter to OpenAI to generate an example analysis. Email and phone are not sent to the AI. Nothing is emailed or saved by this demo. Use fictional details; do not submit sensitive or real customer information.</p>
+      </div>
+      <form id="lead-form">
+        <div class="grid">
+          <label>Name<input name="name" required maxlength="120" autocomplete="name" placeholder="Alex Example"></label>
+          <label>Email<input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="alex@example.com"></label>
+          <label>Phone<input name="phone" maxlength="50" autocomplete="tel" placeholder="703-555-0100"></label>
+          <label>Service
+            <select name="service" required>
+              <option value="AC repair">AC repair</option>
+              <option value="Heating repair">Heating repair</option>
+              <option value="HVAC maintenance">HVAC maintenance</option>
+              <option value="New HVAC installation">New HVAC installation</option>
+              <option value="Indoor air quality">Indoor air quality</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+        </div>
+        <label>Customer message
+          <textarea name="message" required maxlength="3000" placeholder="My AC stopped cooling this afternoon and I need help arranging a service visit."></textarea>
+        </label>
+        <label class="analysis-consent"><input name="consent" type="checkbox" required><span>I understand the name, service, and message above will be sent to OpenAI for this demo analysis.</span></label>
+        <button type="submit" class="primary-action">Run AI analysis</button>
+      </form>
       <p id="status" role="status" aria-live="polite"></p>
     </section>
 
     <section id="result" class="card hidden" role="region" aria-labelledby="result-title" tabindex="-1">
-      <div class="section-kicker">SAMPLE PREVIEW</div><h2 id="result-title" tabindex="-1">A clear next step for this lead</h2>
-      <p class="preview-notice">Illustrative sample only. Nothing is sent to AI, saved, or emailed.</p>
+      <div class="section-kicker" id="result-kicker">SAMPLE PREVIEW</div><h2 id="result-title" tabindex="-1">A clear next step for this lead</h2>
+      <p class="preview-notice" id="preview-notice">Illustrative sample only. Nothing is sent to AI, saved, or emailed.</p>
       <div class="result-divider"></div>
       <h2>Suggested next action</h2>
       <p class="next-action" id="next-action"></p>
@@ -75,7 +100,9 @@
 
 <script>
 const statusBox = document.getElementById("status");
+const form = document.getElementById("lead-form");
 const result = document.getElementById("result");
+const submitButton = form.querySelector("button[type='submit']");
 const scenarios = {
   emergency: {
     lead: {name: "Sample homeowner", service: "AC repair"},
@@ -106,8 +133,18 @@ const scenarios = {
   }
 };
 
-function renderResult(body) {
+async function readJsonResponse(response) {
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
+  return body;
+}
+
+function renderResult(body, isAiAnalysis = false) {
   const analysis = body.analysis;
+  document.getElementById("result-kicker").textContent = isAiAnalysis ? "AI SAMPLE ANALYSIS" : "SAMPLE PREVIEW";
+  document.getElementById("preview-notice").textContent = isAiAnalysis
+    ? "AI-generated demo output. Nothing was emailed or saved; review any reply before using it."
+    : "Illustrative sample only. Nothing is sent to AI, saved, or emailed.";
   document.getElementById("temperature").textContent = {
     Hot: "High",
     Warm: "Medium",
@@ -126,8 +163,36 @@ function renderResult(body) {
   result.classList.remove("hidden");
   document.getElementById("result-title").focus({preventScroll: true});
   result.scrollIntoView({block: "start", behavior: "smooth"});
-  statusBox.textContent = "Sample preview loaded. No information was sent or stored.";
+  statusBox.textContent = isAiAnalysis
+    ? "AI analysis complete. The inquiry was not emailed or saved."
+    : "Sample preview loaded. No information was sent or stored.";
 }
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!form.reportValidity()) return;
+
+  submitButton.disabled = true;
+  statusBox.textContent = "Analyzing inquiry...";
+  result.classList.add("hidden");
+  const data = Object.fromEntries(new FormData(form).entries());
+  delete data.consent;
+
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
+    const body = await readJsonResponse(response);
+    renderResult(body, true);
+    form.reset();
+  } catch (error) {
+    statusBox.textContent = error.message;
+  } finally {
+    submitButton.disabled = false;
+  }
+});
 
 document.querySelectorAll(".scenario").forEach(button => {
   button.addEventListener("click", () => {
