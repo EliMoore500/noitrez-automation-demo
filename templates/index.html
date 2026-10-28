@@ -327,7 +327,7 @@ function draftParts() {
   const {inquiry, analysis} = lastRun;
   return {
     to: inquiry.email,
-    subject: `Re: your ${inquiry.service} inquiry`,
+    subject: `Re: Your ${inquiry.service.replace(/\b[a-z]/g, c => c.toUpperCase())} Inquiry`,
     body: analysis.customer_reply
   };
 }
