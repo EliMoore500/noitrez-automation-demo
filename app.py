@@ -46,11 +46,18 @@ def analyze_lead(name, service, message):
             "priority as Hot, Warm, or Cold and urgency as Emergency, Urgent, "
             "Normal, or Low. Be cautious with safety concerns and route them to "
             "a human. Do not provide repair instructions, diagnosis, prices, or "
-            "promises about response times. Write a concise summary, explain the "
-            "classification, and draft a short acknowledgment for staff review."
+            "promises about response times. Write a concise summary and explain the "
+            "classification. For customer_reply, draft a warm, polished message "
+            "from a friendly local HVAC team for staff review: greet the customer "
+            "by first name, acknowledge their specific situation in one sentence "
+            "without repeating their words, reassure them that a team member will "
+            "personally follow up, and ask for one useful detail such as a good "
+            "time to reach them. Use 3 to 5 short sentences, a confident and "
+            "caring tone, no filler or repeated phrases, and sign off as "
+            "'The Noitrez Sample HVAC Team'."
         ),
         input=json.dumps({"name": name, "service": service, "message": message}),
-        max_output_tokens=350,
+        max_output_tokens=600,
         text={
             "format": {
                 "type": "json_schema",
