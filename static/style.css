@@ -94,6 +94,7 @@ button.scenario[aria-pressed="true"] { border-color: var(--accent); background: 
 .analysis-consent span { color: var(--muted); }
 .result-cta { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; margin-top: 20px; color: #c6b9ff; font-weight: 700; text-decoration: none; }
 .result-cta:hover { color: #fff; }
+.result-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 .site-footer { display: flex; justify-content: space-between; gap: 18px; width: min(1100px, 90%); margin: 0 auto; padding: 20px 0 28px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .site-footer a { min-height: 44px; display: inline-flex; align-items: center; color: #c6b9ff; text-decoration: none; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #c4b8ff; outline-offset: 3px; }

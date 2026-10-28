@@ -87,6 +87,8 @@ class DemoAIAnalysisTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(page.count('data-scenario="'), 3)
         self.assertIn('id="lead-form"', page)
+        self.assertIn('id="download-sheet"', page)
+        self.assertNotIn("Load a sample workflow", page)
         self.assertIn('name="service"', page)
         self.assertIn('name="message"', page)
         self.assertIn("OpenAI", page)

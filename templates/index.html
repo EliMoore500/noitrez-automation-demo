@@ -29,7 +29,6 @@
         <h1>Less busywork.<br>Faster follow-up.</h1>
         <p class="business-outcome">A sample of how Noitrez helps Northern Virginia HVAC teams prioritize urgent inquiries and prepare timely follow-up, without adding repetitive admin.</p>
         <div class="hero-actions">
-          <a class="hero-demo" href="#lead-demo">Load a sample workflow</a>
           <a class="hero-audit" href="https://noitrez.com/#contact">Request a free workflow audit</a>
         </div>
       </div>
@@ -87,6 +86,10 @@
       <p id="reason"></p>
       <h3>Customer reply</h3>
       <div class="reply" id="customer-reply"></div>
+      <div class="result-actions">
+        <button type="button" class="secondary" id="download-sheet">Download spreadsheet</button>
+        <span class="muted">Opens in Excel or Google Sheets. Created in your browser; nothing is uploaded.</span>
+      </div>
       <a class="result-cta" href="https://noitrez.com/#contact">Discuss a workflow like this <span aria-hidden="true">→</span></a>
     </section>
 
@@ -103,6 +106,7 @@ const statusBox = document.getElementById("status");
 const form = document.getElementById("lead-form");
 const result = document.getElementById("result");
 const submitButton = form.querySelector("button[type='submit']");
+let lastRun = null;
 const scenarios = {
   emergency: {
     name: "Sample homeowner",
@@ -179,6 +183,7 @@ form.addEventListener("submit", async event => {
       body: JSON.stringify(data)
     });
     const body = await readJsonResponse(response);
+    lastRun = {inquiry: data, analysis: body.analysis, generatedAt: new Date()};
     renderResult(body, true);
     form.reset();
   } catch (error) {
@@ -186,6 +191,56 @@ form.addEventListener("submit", async event => {
   } finally {
     submitButton.disabled = false;
   }
+});
+
+const priorityLabels = {Hot: "High", Warm: "Medium", Cold: "Low"};
+const nextActions = {
+  Hot: "Contact within 15 minutes.",
+  Warm: "Follow up today.",
+  Cold: "Add to a future follow-up list."
+};
+
+// Prefix risky leading characters so spreadsheet apps treat entries as text, not formulas.
+function csvCell(value) {
+  let text = String(value ?? "");
+  if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function buildSpreadsheet(run) {
+  const {inquiry, analysis, generatedAt} = run;
+  const rows = [
+    ["Section", "Field", "Value"],
+    ["Run", "Generated", generatedAt.toLocaleString()],
+    ["Inquiry", "Name", inquiry.name],
+    ["Inquiry", "Email", inquiry.email],
+    ["Inquiry", "Phone", inquiry.phone],
+    ["Inquiry", "Service requested", inquiry.service],
+    ["Inquiry", "Customer message", inquiry.message],
+    ["Triage", "Priority", priorityLabels[analysis.temperature] || analysis.temperature],
+    ["Triage", "Urgency", analysis.urgency],
+    ["Triage", "Service type", analysis.service_type],
+    ["Follow-up", "Suggested next action", nextActions[analysis.temperature] || "Review the inquiry and choose a follow-up time."],
+    ["Follow-up", "Business summary", analysis.summary],
+    ["Follow-up", "Why this classification", analysis.reason],
+    ["Follow-up", "Draft customer reply", analysis.customer_reply]
+  ];
+  // BOM makes Excel read the file as UTF-8.
+  return "\ufeff" + rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+}
+
+document.getElementById("download-sheet").addEventListener("click", () => {
+  if (!lastRun) return;
+  const blob = new Blob([buildSpreadsheet(lastRun)], {type: "text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "noitrez-workflow-preview.csv";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  statusBox.textContent = "Spreadsheet downloaded.";
 });
 
 document.querySelectorAll(".scenario").forEach(button => {
