@@ -25,9 +25,9 @@
   <main class="container">
     <header class="hero">
       <div>
-        <div class="eyebrow">NOITREZ / HVAC LEAD FOLLOW-UP</div>
+        <div class="eyebrow">NOITREZ / LEAD FOLLOW-UP</div>
         <h1>Less busywork.<br>Faster follow-up.</h1>
-        <p class="business-outcome">A sample of how Noitrez helps Northern Virginia HVAC teams prioritize urgent inquiries and prepare timely follow-up, without adding repetitive admin.</p>
+        <p class="business-outcome">A sample of how Noitrez helps Northern Virginia teams prioritize urgent inquiries and prepare timely follow-up, without adding repetitive admin.</p>
         <div class="hero-actions">
           <a class="hero-audit" href="https://noitrez.com/#contact">Request a free workflow audit</a>
         </div>
@@ -88,6 +88,7 @@
       <div class="reply" id="customer-reply"></div>
       <div class="result-actions">
         <button type="button" class="secondary" id="download-sheet">Download spreadsheet</button>
+        <button type="button" class="secondary" id="email-reply">Email this reply</button>
         <span class="muted">Opens in Excel or Google Sheets. Created in your browser; nothing is uploaded.</span>
       </div>
       <a class="result-cta" href="https://noitrez.com/#contact">Discuss a workflow like this <span aria-hidden="true">→</span></a>
@@ -304,6 +305,14 @@ function buildSpreadsheet(run) {
     ["xl/worksheets/sheet1.xml", `${xmlHead}<worksheet ${ns}><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="34"/><cols>${cols}</cols><sheetData>${sheetRows}</sheetData></worksheet>`]
   ]);
 }
+
+document.getElementById("email-reply").addEventListener("click", () => {
+  if (!lastRun) return;
+  const {inquiry, analysis} = lastRun;
+  const subject = `Re: your ${inquiry.service} inquiry`;
+  const mailto = `mailto:${encodeURIComponent(inquiry.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(analysis.customer_reply)}`;
+  window.location.href = mailto;
+});
 
 document.getElementById("download-sheet").addEventListener("click", () => {
   if (!lastRun) return;
