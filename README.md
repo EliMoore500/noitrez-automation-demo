@@ -2,7 +2,7 @@
 
 ## What it does
 
-The public demo has three fictional HVAC inquiries and a live workflow preview. Selecting a sample only prefills the form; it makes no network request until the visitor submits. The live preview sends the submitted name, service, and message to OpenAI to suggest priority and follow-up. Email and phone are validated by the demo but are not sent to the model. After a preview, the visitor can download the inquiry and results as a CSV spreadsheet, generated locally in their browser. The app does not store submissions or send email.
+The public demo has three fictional HVAC inquiries and a live workflow preview. Selecting a sample only prefills the form; it makes no network request until the visitor submits. The live preview sends the submitted name, service, and message to OpenAI to suggest priority and follow-up. Email and phone are validated by the demo but are not sent to the model. After a preview, the visitor can download the inquiry and results as a formatted Excel spreadsheet (.xlsx), generated locally in their browser. The app does not store submissions or send email.
 
 The marketing site's audit form opens a prefilled email draft to `sales@noitrez.com`. The visitor reviews it and presses Send in their email app; the website does not submit or store their form details.
 
