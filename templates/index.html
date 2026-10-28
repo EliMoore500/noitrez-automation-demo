@@ -93,7 +93,7 @@
         </div>
         <div class="result-action">
           <button type="button" class="secondary" id="email-reply">Email this reply</button>
-          <span class="muted">Opens a draft in your email app, addressed to the inquiry's email. You choose whether to send it.</span>
+          <span class="muted">Opens a Gmail draft addressed to the inquiry's email. You choose whether to send it.</span>
         </div>
       </div>
       <a class="result-cta" href="https://noitrez.com/#contact">Discuss a workflow like this <span aria-hidden="true">→</span></a>
@@ -324,31 +324,14 @@ function buildSpreadsheet(run) {
 document.getElementById("email-reply").addEventListener("click", () => {
   if (!lastRun) return;
   const {inquiry, analysis} = lastRun;
-  const subject = encodeURIComponent(`Re: your ${inquiry.service} inquiry`);
-  const body = encodeURIComponent(analysis.customer_reply);
-  const to = encodeURIComponent(inquiry.email);
-  let opened = false;
-  const markOpened = () => { opened = true; };
-  window.addEventListener("blur", markOpened, {once: true});
-  document.addEventListener("visibilitychange", markOpened, {once: true});
-  const link = document.createElement("a");
-  link.href = `mailto:${to}?subject=${subject}&body=${body}`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  // No blur means no mail app took over, so offer a webmail draft instead.
-  setTimeout(() => {
-    window.removeEventListener("blur", markOpened);
-    document.removeEventListener("visibilitychange", markOpened);
-    if (opened) return;
-    const gmail = document.createElement("a");
-    gmail.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
-    gmail.target = "_blank";
-    gmail.rel = "noopener";
-    gmail.textContent = "Open the draft in Gmail";
-    statusBox.textContent = "No email app opened. ";
-    statusBox.append(gmail);
-  }, 1500);
+  const params = new URLSearchParams({
+    view: "cm",
+    fs: "1",
+    to: inquiry.email,
+    su: `Re: your ${inquiry.service} inquiry`,
+    body: analysis.customer_reply
+  });
+  window.open(`https://mail.google.com/mail/?${params}`, "_blank", "noopener");
 });
 
 document.getElementById("download-sheet").addEventListener("click", () => {
