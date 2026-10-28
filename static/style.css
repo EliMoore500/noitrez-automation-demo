@@ -73,6 +73,7 @@ button {
 button:hover { opacity: .9; }
 button.secondary, button.scenario { border-color: #303030; background: transparent; color: var(--text); }
 button.secondary:hover, button.scenario:hover { border-color: #7c5cff; color: #c6b9ff; }
+button.small { padding: 6px 12px; font-size: 13px; }
 button.primary-action span { margin-left: 12px; }
 button.danger { border-color: #512626; background: transparent; color: #ff9c9c; padding: 8px 12px; font-size: 12px; }
 button.danger:hover { background: #281414; }

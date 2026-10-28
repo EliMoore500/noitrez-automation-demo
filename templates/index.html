@@ -93,7 +93,8 @@
         </div>
         <div class="result-action">
           <button type="button" class="secondary" id="email-reply">Email this reply</button>
-          <span class="muted">Opens a Gmail draft addressed to the inquiry's email. You choose whether to send it.</span>
+          <span class="muted">Opens a draft in your email app, addressed to the inquiry's email. You choose whether to send it.</span>
+          <button type="button" class="secondary small hidden" id="gmail-draft">Open Gmail Draft</button>
         </div>
       </div>
       <a class="result-cta" href="https://noitrez.com/#contact">Discuss a workflow like this <span aria-hidden="true">→</span></a>
@@ -187,6 +188,7 @@ form.addEventListener("submit", async event => {
   submitButton.disabled = true;
   statusBox.textContent = "Analyzing inquiry...";
   result.classList.add("hidden");
+  document.getElementById("gmail-draft").classList.add("hidden");
   const data = Object.fromEntries(new FormData(form).entries());
   delete data.consent;
 
@@ -321,16 +323,30 @@ function buildSpreadsheet(run) {
   ]);
 }
 
+function draftParts() {
+  const {inquiry, analysis} = lastRun;
+  return {
+    to: inquiry.email,
+    subject: `Re: your ${inquiry.service} inquiry`,
+    body: analysis.customer_reply
+  };
+}
+
 document.getElementById("email-reply").addEventListener("click", () => {
   if (!lastRun) return;
-  const {inquiry, analysis} = lastRun;
-  const params = new URLSearchParams({
-    view: "cm",
-    fs: "1",
-    to: inquiry.email,
-    su: `Re: your ${inquiry.service} inquiry`,
-    body: analysis.customer_reply
-  });
+  const {to, subject, body} = draftParts();
+  const link = document.createElement("a");
+  link.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  document.getElementById("gmail-draft").classList.remove("hidden");
+});
+
+document.getElementById("gmail-draft").addEventListener("click", () => {
+  if (!lastRun) return;
+  const {to, subject, body} = draftParts();
+  const params = new URLSearchParams({view: "cm", fs: "1", to, su: subject, body});
   window.open(`https://mail.google.com/mail/?${params}`, "_blank", "noopener");
 });
 
