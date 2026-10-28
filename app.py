@@ -53,8 +53,9 @@ def analyze_lead(name, service, message):
             "without repeating their words, reassure them that a team member will "
             "personally follow up, and ask for one useful detail such as a good "
             "time to reach them. Use 3 to 5 short sentences, a confident and "
-            "caring tone, no filler or repeated phrases, and sign off as "
-            "'The Noitrez Sample HVAC Team'."
+            "caring tone, no filler or repeated phrases. Format it as three "
+            "blocks separated by a blank line: the greeting line, the body, and "
+            "the sign-off 'The Noitrez Sample HVAC Team'."
         ),
         input=json.dumps({"name": name, "service": service, "message": message}),
         max_output_tokens=600,

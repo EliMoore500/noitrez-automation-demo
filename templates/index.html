@@ -137,6 +137,14 @@ const scenarios = {
   }
 };
 
+// Ensure a blank line after the greeting and before the signature.
+function formatReply(text) {
+  return String(text ?? "").replace(/\r\n/g, "\n").trim()
+    .replace(/^((?:Hi|Hello|Dear)\b[^\n,]{0,40},)[ \t]*\n?(?!\n)/i, "$1\n\n")
+    .replace(/\s*\n?(The Noitrez Sample HVAC Team)\s*$/, "\n\n$1")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
 async function readJsonResponse(response) {
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
@@ -189,7 +197,9 @@ form.addEventListener("submit", async event => {
       body: JSON.stringify(data)
     });
     const body = await readJsonResponse(response);
-    lastRun = {inquiry: data, analysis: body.analysis, generatedAt: new Date()};
+    const analysis = {...body.analysis, customer_reply: formatReply(body.analysis.customer_reply)};
+    body.analysis = analysis;
+    lastRun = {inquiry: data, analysis, generatedAt: new Date()};
     renderResult(body, true);
     form.reset();
   } catch (error) {
@@ -314,9 +324,31 @@ function buildSpreadsheet(run) {
 document.getElementById("email-reply").addEventListener("click", () => {
   if (!lastRun) return;
   const {inquiry, analysis} = lastRun;
-  const subject = `Re: your ${inquiry.service} inquiry`;
-  const mailto = `mailto:${encodeURIComponent(inquiry.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(analysis.customer_reply)}`;
-  window.location.href = mailto;
+  const subject = encodeURIComponent(`Re: your ${inquiry.service} inquiry`);
+  const body = encodeURIComponent(analysis.customer_reply);
+  const to = encodeURIComponent(inquiry.email);
+  let opened = false;
+  const markOpened = () => { opened = true; };
+  window.addEventListener("blur", markOpened, {once: true});
+  document.addEventListener("visibilitychange", markOpened, {once: true});
+  const link = document.createElement("a");
+  link.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  // No blur means no mail app took over, so offer a webmail draft instead.
+  setTimeout(() => {
+    window.removeEventListener("blur", markOpened);
+    document.removeEventListener("visibilitychange", markOpened);
+    if (opened) return;
+    const gmail = document.createElement("a");
+    gmail.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+    gmail.target = "_blank";
+    gmail.rel = "noopener";
+    gmail.textContent = "Open the draft in Gmail";
+    statusBox.textContent = "No email app opened. ";
+    statusBox.append(gmail);
+  }, 1500);
 });
 
 document.getElementById("download-sheet").addEventListener("click", () => {
