@@ -5,7 +5,7 @@ import time
 from collections import defaultdict, deque
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from openai import OpenAI
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -96,6 +96,11 @@ def analyze_lead(name, service, message):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.get("/favicon.png")
+def favicon():
+    return send_from_directory(app.root_path, "NoitrezLogoNoBG.png", mimetype="image/png")
 
 
 @app.post("/api/analyze")
